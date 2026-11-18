@@ -1,107 +1,264 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center my-3">
-    <div class="col-lg-9">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body p-5">
-                
-                <!-- Header Section -->
-                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
-                    <div>
-                        <h3 class="fw-bold text-dark mb-1">Candidate Profile & Portfolio</h3>
-                        <p class="text-muted mb-0">Keep your professional details updated for precise AI internship matching.</p>
-                    </div>
-                </div>
+<style>
+  .if-container {
+    max-width: 920px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
+  }
+  .if-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+  }
+  .if-card-header {
+    background: #0f172a;
+    color: #ffffff;
+    padding: 1.25rem 1.75rem;
+  }
+  .if-card-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .if-card-header p {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: #cbd5e1;
+  }
+  .if-card-body {
+    padding: 1.75rem;
+  }
+  .if-section {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .if-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 1rem;
+    padding-bottom: 0;
+  }
+  .if-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #2563eb;
+    margin: 0 0 1rem;
+  }
+  .if-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 1.25rem;
+  }
+  .if-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem 1.25rem;
+  }
+  .if-full {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 768px) {
+    .if-grid-2, .if-grid-3 {
+      grid-template-columns: 1fr;
+    }
+  }
+  .if-field {
+    display: flex;
+    flex-direction: column;
+  }
+  .if-field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.35rem;
+  }
+  .if-field input,
+  .if-field select,
+  .if-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.925rem;
+    color: #0f172a;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .if-field input:focus,
+  .if-field select:focus,
+  .if-field textarea:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+  .if-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .if-btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 0.65rem 1.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .if-btn-primary:hover {
+    background: #1d4ed8;
+  }
+  .if-btn-secondary {
+    background: #f1f5f9;
+    color: #334155;
+    text-decoration: none;
+    padding: 0.65rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .if-btn-secondary:hover {
+    background: #e2e8f0;
+  }
+</style>
 
-                <form method="POST" enctype="multipart/form-data">
-                    
-                    <!-- Section 1: Basic Information -->
-                    <h5 class="fw-semibold text-primary mb-3">1. Personal & Academic Details</h5>
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <label class="form-label fw-medium text-secondary">Full Name *</label>
-                            <input type="text" name="name" class="form-control" placeholder="e.g. Alex Morgan" value="{{ profile.name if profile else '' }}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-medium text-secondary">Email Address *</label>
-                            <input type="email" name="email" class="form-control" placeholder="alex.morgan@example.com" value="{{ profile.email if profile else '' }}" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-medium text-secondary">College / University</label>
-                        <input type="text" name="college" class="form-control" placeholder="e.g. Institute of Technology & Science" value="{{ profile.college if profile else '' }}">
-                    </div>
-
-                    <!-- Academic Score & Type -->
-                    <!-- Academic Score & Type -->
-         <!-- Academic Score & Type -->
-<!-- Academic Details Section -->
-<div class="mb-3">
-    <label for="cgpa" class="form-label fw-semibold">CGPA / Percentage</label>
-    <input type="text" class="form-control rounded-3" id="cgpa" name="cgpa" value="{{ profile.cgpa if profile else '' }}" placeholder="e.g., 8.5 CGPA or 62%">
-    <div class="form-text text-muted">Enter your aggregate CGPA (e.g., 8.2) or percentage (e.g., 78%).</div>
-</div>
-                    <!-- Section 2: Professional Links -->
-                    <h5 class="fw-semibold text-primary mb-3">2. Professional Profiles</h5>
-                    <div class="row mb-4">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <label class="form-label fw-medium text-secondary">GitHub Profile URL</label>
-                            <input type="url" name="github_url" class="form-control" placeholder="https://github.com/username" value="{{ profile.github_url if profile else '' }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-medium text-secondary">LinkedIn Profile URL</label>
-                            <input type="url" name="linkedin_url" class="form-control" placeholder="https://linkedin.com/in/username" value="{{ profile.linkedin_url if profile else '' }}">
-                        </div>
-                    </div>
-
-                    <!-- Section 3: Skills & Experience -->
-                    <h5 class="fw-semibold text-primary mb-3">3. Skills, Projects & Certifications</h5>
-                    <div class="mb-3">
-                        <label class="form-label fw-medium text-secondary">Technical Skills (Comma-Separated) *</label>
-                        <input type="text" name="skills" class="form-control" placeholder="Python, Flask, SQLite, JavaScript, Git, React" value="{{ profile.skills if profile else '' }}" required>
-                        <div class="form-text text-muted">Example: Python, Flask, SQL, Machine Learning</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-medium text-secondary">Key Projects</label>
-                        <textarea name="projects" class="form-control" rows="3" placeholder="Describe projects you've built (e.g. Internship Finder Web App - Built with Flask & Bootstrap)...">{{ profile.projects if profile else '' }}</textarea>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-medium text-secondary">Courses Completed & Certifications</label>
-                        <textarea name="courses" class="form-control" rows="2" placeholder="List certifications or major courses completed (e.g. Meta Back-End Developer Certificate, AWS Cloud Practitioner)...">{{ profile.courses if profile else '' }}</textarea>
-                    </div>
-
-                    <!-- Section 4: Preferences & Resume -->
-                    <h5 class="fw-semibold text-primary mb-3">4. Internship Preferences & Resume</h5>
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <label class="form-label fw-medium text-secondary">Preferred Role</label>
-                            <input type="text" name="preferred_role" class="form-control" placeholder="e.g. Software Engineering Intern" value="{{ profile.preferred_role if profile else '' }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-medium text-secondary">Preferred Location</label>
-                            <input type="text" name="preferred_location" class="form-control" placeholder="e.g. Remote / Bangalore / Mumbai" value="{{ profile.preferred_location if profile else '' }}">
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-medium text-secondary">Upload Resume (PDF or TXT, Max 2MB)</label>
-                        <input type="file" name="resume" class="form-control" accept=".pdf,.txt">
-                        {% if profile and profile.resume_filename %}
-                            <div class="form-text text-success mt-1">📄 Currently stored resume: <strong>{{ profile.resume_filename }}</strong></div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Submit Action -->
-                    <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg py-3 fw-semibold rounded-3 shadow-sm">Save Profile & Continue</button>
-                    </div>
-                </form>
-
-            </div>
-        </div>
+<div class="if-container">
+  <div class="if-card">
+    <div class="if-card-header">
+      <h3>Candidate Academic &amp; Technical Profile</h3>
+      <p>Complete your academic standing, semester timeline, and project stack for tailored internship matching.</p>
     </div>
+
+    <div class="if-card-body">
+      <form method="POST" action="{{ url_for('student_profile') }}">
+        <!-- Section 1: Identity & Portfolio -->
+        <div class="if-section">
+          <div class="if-section-title">1. Personal &amp; Portfolio Links</div>
+          <div class="if-grid-2">
+            <div class="if-field">
+              <label>Full Name *</label>
+              <input type="text" name="name" required
+                     value="{{ (profile['name'] or '') if profile else '' }}">
+            </div>
+            <div class="if-field">
+              <label>Email Address *</label>
+              <input type="email" name="email" required
+                     value="{{ (profile['email'] or session.get('email', '')) if profile else session.get('email', '') }}">
+            </div>
+            <div class="if-field">
+              <label>GitHub Profile URL</label>
+              <input type="url" name="github_url" placeholder="https://github.com/username"
+                     value="{{ (profile['github_url'] or '') if profile else '' }}">
+            </div>
+            <div class="if-field">
+              <label>LinkedIn Profile URL</label>
+              <input type="url" name="linkedin_url" placeholder="https://linkedin.com/in/username"
+                     value="{{ (profile['linkedin_url'] or '') if profile else '' }}">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Academic & Semester Timeline -->
+        <div class="if-section">
+          <div class="if-section-title">2. Academic Standing &amp; Semester Window</div>
+          <div class="if-grid-3">
+            <div class="if-field" style="grid-column: span 2;">
+              <label>College / University Name</label>
+              <input type="text" name="college" placeholder="e.g., National Institute of Technology"
+                     value="{{ (profile['college'] or '') if profile else '' }}">
+            </div>
+            <div class="if-field">
+              <label>Current CGPA / %</label>
+              <input type="text" name="cgpa" placeholder="e.g., 8.45 or 82%"
+                     value="{{ (profile['cgpa'] or '') if profile else '' }}">
+            </div>
+
+            <div class="if-field" style="grid-column: span 2;">
+              <label>Degree &amp; Completed Courses</label>
+              <input type="text" name="courses" placeholder="e.g., B.Tech CSE — DBMS, OS, CN, Python, Web Dev"
+                     value="{{ (profile['courses'] or '') if profile else '' }}">
+            </div>
+            <div class="if-field">
+              <label>Course Duration</label>
+              {% set cd = (profile['course_duration'] or '') if profile else '' %}
+              <select name="course_duration">
+                <option value="4 Years (8 Semesters)" {% if cd == '4 Years (8 Semesters)' %}selected{% endif %}>4 Years (8 Semesters)</option>
+                <option value="3 Years (6 Semesters)" {% if cd == '3 Years (6 Semesters)' %}selected{% endif %}>3 Years (6 Semesters)</option>
+                <option value="2 Years (4 Semesters)" {% if cd == '2 Years (4 Semesters)' %}selected{% endif %}>2 Years (4 Semesters)</option>
+                <option value="5 Years (10 Semesters)" {% if cd == '5 Years (10 Semesters)' %}selected{% endif %}>5 Years (10 Semesters)</option>
+              </select>
+            </div>
+
+            <div class="if-field">
+              <label>Current Semester</label>
+              <input type="text" name="current_semester" placeholder="e.g., Semester 5"
+                     value="{{ (profile['current_semester'] or '') if profile else '' }}">
+            </div>
+            <div class="if-field">
+              <label>Target Internship Semester</label>
+              <input type="text" name="target_semester" placeholder="e.g., Semester 6 (Summer)"
+                     value="{{ (profile['target_semester'] or '') if profile else '' }}">
+            </div>
+            <div class="if-field">
+              <label>Internship Duration</label>
+              <input type="text" name="internship_duration" placeholder="e.g., 2 Months / 6 Months"
+                     value="{{ (profile['internship_duration'] or '') if profile else '' }}">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Internship Target, Skills & Projects -->
+        <div class="if-section">
+          <div class="if-section-title">3. Target Role, Location &amp; Technical Work</div>
+          <div class="if-grid-3">
+            <div class="if-field">
+              <label>Preferred Role</label>
+              <input type="text" name="preferred_role" placeholder="e.g., Python Backend Intern"
+                     value="{{ (profile['preferred_role'] or '') if profile else '' }}">
+            </div>
+            <div class="if-field">
+              <label>Preferred City / Location</label>
+              <input type="text" name="preferred_location" placeholder="e.g., Chennai, Bengaluru, Remote"
+                     value="{{ (profile['preferred_location'] or '') if profile else '' }}">
+            </div>
+            <div class="if-field">
+              <label>Expected Stipend</label>
+              <input type="text" name="stipend_expectation" placeholder="e.g., ₹15,000–₹25,000/mo"
+                     value="{{ (profile['stipend_expectation'] or '') if profile else '' }}">
+            </div>
+
+            <div class="if-field if-full">
+              <label>Technical Skills *</label>
+              <input type="text" name="skills" required placeholder="e.g., Python, Flask, SQLite, HTML, CSS, Git"
+                     value="{{ (profile['skills'] or '') if profile else '' }}">
+            </div>
+
+            <div class="if-field if-full">
+              <label>Projects Completed</label>
+              <textarea name="projects" rows="3"
+                        placeholder="Describe your projects, tech stack used, and key features...">{{ (profile['projects'] or '') if profile else '' }}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="if-actions">
+          <button type="submit" class="if-btn-primary">Save Profile &amp; Update Parameters</button>
+          <a href="{{ url_for('student_dashboard') }}" class="if-btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}

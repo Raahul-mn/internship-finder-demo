@@ -1,115 +1,377 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center my-4">
-    <div class="col-lg-10">
-        
-        <!-- Header Card -->
-        <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white">
-            <div class="card-body p-4 d-flex justify-content-between align-items-center">
-                <div>
-                    <h3 class="fw-bold text-dark mb-1">🎯 Smart Internship Match & Opportunity Dashboard</h3>
-                    <p class="text-muted mb-0">Exact company openings and tailored hiring roadmaps for <strong>{{ profile.name }}</strong>.</p>
-                </div>
-                <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary btn-sm px-3 shadow-sm rounded-pill">← Dashboard</a>
-            </div>
-        </div>
+<style>
+  .rec-wrap {
+    max-width: 980px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
+  }
+  .rec-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .rec-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .rec-engine-pill {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+  }
+  .rec-engine-live {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+  }
+  .rec-engine-fallback {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+  }
+  .rec-summary-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 768px) {
+    .rec-summary-bar {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .rec-stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    font-weight: 600;
+  }
+  .rec-stat-val {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 0.15rem;
+  }
+  .rec-band-note {
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #1e3a8a;
+    margin-bottom: 1.5rem;
+  }
+  .rec-opp-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  }
+  .rec-opp-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 1rem;
+  }
+  .rec-role-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .rec-tier-sub {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #2563eb;
+  }
+  .rec-score-badge {
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.4rem 0.85rem;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+  .rec-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 768px) {
+    .rec-meta-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .rec-meta-box {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+  .rec-meta-box strong {
+    display: block;
+    color: #334155;
+    margin-bottom: 0.2rem;
+  }
+  .rec-companies-row {
+    margin-bottom: 1rem;
+  }
+  .rec-companies-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+  }
+  .rec-company-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .rec-company-pill {
+    background: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+  }
+  .rec-points {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #334155;
+  }
+  .rec-points li {
+    margin-bottom: 0.35rem;
+  }
+  .rec-bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 768px) {
+    .rec-bottom-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .rec-subcard {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .rec-subcard h4 {
+    margin: 0 0 0.85rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .rec-wf-item {
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .rec-wf-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  .rec-wf-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #2563eb;
+    margin-bottom: 0.35rem;
+  }
+  .rec-wf-steps {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.5;
+  }
+  .rec-disclaimer {
+    font-size: 0.8rem;
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .rec-footer-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+  .rec-btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .rec-btn-secondary {
+    background: #f1f5f9;
+    color: #334155;
+    text-decoration: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+</style>
 
-        {% if recommendations is mapping and recommendations.opportunities %}
-            <!-- SECTION 1: Exact Company Matches & Tiers -->
-            <div class="card shadow-sm border-0 rounded-4 mb-4 border-start border-primary border-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold text-dark mb-4">🏢 Where You Can Apply (Target Companies & Tiers)</h5>
-                    <div class="row g-4">
-                        {% for opp in recommendations.opportunities %}
-                            <div class="col-md-6">
-                                <div class="p-4 border rounded-4 bg-light h-100 shadow-sm d-flex flex-column justify-content-between">
-                                    <div>
-                                        <div class="badge bg-primary text-white mb-3 px-3 py-2 rounded-pill fw-semibold">{{ opp.company_tier | default('Target Tier') }}</div>
-                                        <h5 class="fw-bold text-dark mb-3">{{ opp.matched_role or opp.title }}</h5>
-                                        
-                                        <!-- Company Name Badges (Supports both old and new cache keys) -->
-                                        <div class="mb-3">
-                                            <span class="small text-muted fw-bold d-block mb-2">📍 Target Companies:</span>
-                                            <div class="d-flex flex-wrap gap-1">
-                                                {% set raw_comps = opp.companies or opp.company_names or opp.company or "Zoho, Freshworks, Postman, Razorpay" %}
-                                                {% set comp_list = raw_comps if raw_comps is iterable and raw_comps is not string else raw_comps.split(',') %}
-                                                {% for comp in comp_list %}
-                                                    <span class="badge bg-white text-dark border px-2 py-1 small shadow-sm">{{ comp.strip() }}</span>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
+<div class="rec-wrap">
+  <div class="rec-header">
+    <h2>AI Opportunity Matchmaker</h2>
+    {% if recommendations.engine_source %}
+      <span class="rec-engine-pill {{ 'rec-engine-live' if 'Gemini Live AI' in recommendations.engine_source else 'rec-engine-fallback' }}">
+        {{ recommendations.engine_source }}
+      </span>
+    {% endif %}
+  </div>
 
-                                    <!-- Eligibility Points (Supports both lists and text strings) -->
-                                    <div class="p-3 bg-white rounded-3 border shadow-sm">
-                                        <span class="small text-success fw-bold d-block mb-1">💡 Why You're Eligible:</span>
-                                        <ul class="mb-0 ps-3 small text-muted">
-                                            {% set raw_points = opp.eligibility_points or opp.why_eligible or opp.match_reason or ["Your verified technical skills match enterprise backend requirements."] %}
-                                            {% set points = raw_points if raw_points is iterable and raw_points is not string else [raw_points] %}
-                                            {% for pt in points %}
-                                                <li class="mb-1">{{ pt }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECTION 2: Visual Selection Workflows -->
-            <div class="card shadow-sm border-0 rounded-4 mb-4 border-start border-info border-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold text-dark mb-4">📋 Company-Specific Selection Workflows</h5>
-                    
-                    {% for wf in recommendations.workflows or recommendations.workflow %}
-                        <div class="mb-4 p-4 rounded-4 bg-light border">
-                            <span class="badge bg-dark text-white px-3 py-2 rounded-pill mb-3 fw-semibold">{{ wf.target_type or 'Hiring Pipeline' }}</span>
-                            
-                            <!-- Timeline Pipeline Grid -->
-                            <div class="row g-3 mt-1">
-                                {% set raw_steps = wf.steps or wf.detail or "1. Apply via Portal -> 2. Online Assessment -> 3. Technical Interview" %}
-                                {% set steps_list = raw_steps if raw_steps is iterable and raw_steps is not string else raw_steps.split('->') %}
-                                {% for step in steps_list %}
-                                    <div class="col-md-6 col-lg-3">
-                                        <div class="p-3 bg-white rounded-3 border h-100 shadow-sm position-relative d-flex flex-column justify-content-between">
-                                            <div>
-                                                <span class="badge bg-primary-subtle text-primary fw-bold mb-2 rounded-pill px-2">Stage {{ loop.index }}</span>
-                                                <p class="small text-secondary mb-0 fw-medium">{{ step.strip() }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- SECTION 3: Profile Optimization Insights -->
-            <div class="card shadow-sm border-0 rounded-4 mb-4 border-start border-warning border-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold text-dark mb-3">💡 GitHub & LinkedIn Profile Optimization</h5>
-                    <div class="list-group list-group-flush">
-                        {% for insight in recommendations.profile_insights or recommendations.portfolio_tips %}
-                            <div class="list-group-item bg-transparent px-0 py-2 border-0 d-flex align-items-start">
-                                <span class="text-warning me-2 fs-5">▪</span>
-                                <span class="text-secondary small lh-base">{{ insight }}</span>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-
-        <!-- Action Bar -->
-        <div class="d-flex justify-content-end">
-            <form action="{{ url_for('generate_recommendations') }}" method="GET">
-                <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm rounded-pill">🔄 Refresh Opportunity Match</button>
-            </form>
-        </div>
-
+  <!-- Compact 4-Column Profile Snapshot -->
+  <div class="rec-summary-bar">
+    <div>
+      <div class="rec-stat-label">Target Location</div>
+      <div class="rec-stat-val">{{ profile['preferred_location'] or 'India / Remote' }}</div>
     </div>
+    <div>
+      <div class="rec-stat-label">CGPA Standing</div>
+      <div class="rec-stat-val">{{ profile['cgpa'] or 'Not specified' }}</div>
+    </div>
+    <div>
+      <div class="rec-stat-label">Semester Window</div>
+      <div class="rec-stat-val">{{ profile['current_semester'] or 'Current' }} &rarr; {{ profile['target_semester'] or 'Target' }}</div>
+    </div>
+    <div>
+      <div class="rec-stat-label">Duration &amp; Stipend</div>
+      <div class="rec-stat-val">{{ profile['internship_duration'] or 'Flexible' }} ({{ profile['stipend_expectation'] or 'Standard' }})</div>
+    </div>
+  </div>
+
+  {% if recommendations.academic_band %}
+    <div class="rec-band-note">
+      <strong>Academic Calibration:</strong> {{ recommendations.academic_band }}
+    </div>
+  {% endif %}
+
+  <!-- Matched Opportunity Cards -->
+  {% for opp in recommendations.opportunities %}
+    <div class="rec-opp-card">
+      <div class="rec-opp-top">
+        <div>
+          <h3 class="rec-role-title">{{ opp.matched_role }}</h3>
+          <div class="rec-tier-sub">{{ opp.company_tier }}</div>
+        </div>
+        {% if opp.match_score is not none %}
+          <span class="rec-score-badge">Estimated Match: {{ opp.match_score }}%</span>
+        {% else %}
+          <span class="rec-score-badge">Match score unavailable</span>
+        {% endif %}
+      </div>
+
+      <div class="rec-meta-grid">
+        {% if opp.location_fit %}
+          <div class="rec-meta-box">
+            <strong>Location Match ({{ profile['preferred_location'] or 'India' }})</strong>
+            {{ opp.location_fit }}
+          </div>
+        {% endif %}
+        {% if opp.timeline_fit %}
+          <div class="rec-meta-box">
+            <strong>Semester, Duration &amp; Stipend Fit</strong>
+            {{ opp.timeline_fit }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="rec-companies-row">
+        <div class="rec-companies-label">Example Target Companies (Career Guidance)</div>
+        <div class="rec-company-pills">
+          {% for comp in opp.companies %}
+            <span class="rec-company-pill">{{ comp }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <ul class="rec-points">
+        {% for point in opp.eligibility_points %}
+          <li>{{ point }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+
+  <!-- Workflows & Academic Insights Side by Side -->
+  <div class="rec-bottom-grid">
+    {% if recommendations.workflows %}
+      <div class="rec-subcard">
+        <h4>Expected Selection Workflows</h4>
+        {% for wf in recommendations.workflows %}
+          <div class="rec-wf-item">
+            <div class="rec-wf-title">{{ wf.target_type }}</div>
+            <ol class="rec-wf-steps">
+              {% for step in wf.steps %}
+                <li>{{ step }}</li>
+              {% endfor %}
+            </ol>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if recommendations.profile_insights %}
+      <div class="rec-subcard">
+        <h4>Personalized Academic &amp; Timeline Insights</h4>
+        <ul class="rec-points">
+          {% for insight in recommendations.profile_insights %}
+            <li>{{ insight }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="rec-disclaimer">
+    AI recommendations are for career guidance and skill mapping only. This portal does not guarantee live job openings or external placement.[cite: 1, 2]
+  </div>
+
+  <div class="rec-footer-actions">
+    <a href="{{ url_for('student_profile') }}" class="rec-btn-primary">Edit Profile Parameters</a>
+    <a href="{{ url_for('student_dashboard') }}" class="rec-btn-secondary">Back to Dashboard</a>
+  </div>
 </div>
 {% endblock %}

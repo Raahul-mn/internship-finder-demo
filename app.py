@@ -1,17 +1,30 @@
 import os
 import json
+from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from functools import wraps
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 from database import init_db, get_db_connection
 from gemini_service import generate_ai_recommendations
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'internship_finder_secret_key_2026'
-app.config['DATABASE_PATH'] = os.path.join(app.instance_path, 'internship_finder.db')
+app.config['SECRET_KEY'] = (
+    os.environ.get('SECRET_KEY', '').strip()
+    or 'internship_finder_secret_key_2026'
+)
+app.config['DATABASE_PATH'] = (
+    os.environ.get('DATABASE_PATH', '').strip()
+    or os.path.join(app.instance_path, 'internship_finder.db')
+)
 
 init_db(app)
+
 
 def login_required(f):
     @wraps(f)
@@ -22,6 +35,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 def student_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -30,6 +44,7 @@ def student_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
 
 def admin_required(f):
     @wraps(f)
@@ -49,11 +64,10 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        # Safely catch whether the form input is named 'email' or 'username'
         raw_email = request.form.get('email') or request.form.get('username')
         email = raw_email.strip().lower() if raw_email else ''
         password = request.form.get('password')
-        role = request.form.get('role', 'student')
+        role = 'student'
 
         if not email or not password:
             flash('Email and password are required.', 'error')
@@ -61,7 +75,7 @@ def register():
 
         db = get_db_connection(app.config['DATABASE_PATH'])
         existing_user = db.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
-        
+
         if existing_user:
             flash('Email already registered. Please log in.', 'error')
             db.close()
@@ -81,7 +95,6 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Safely capture whether the form input is named 'email' or 'username'
         raw_email = request.form.get('email') or request.form.get('username')
         email = raw_email.strip().lower() if raw_email else ''
         password = request.form.get('password')
@@ -95,7 +108,7 @@ def login():
             session['email'] = user['email']
             session['role'] = user['role']
             flash('Logged in successfully!', 'success')
-            
+
             if user['role'] == 'admin':
                 return redirect(url_for('admin_dashboard'))
             else:
@@ -104,6 +117,7 @@ def login():
             flash('Invalid email or password.', 'error')
 
     return render_template('login.html', title="Login — InternShip Finder")
+
 
 @app.route('/logout')
 def logout():
@@ -129,35 +143,64 @@ def student_profile():
     user_id = session.get('user_id')
 
     if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        college = request.form.get('college')
-        cgpa = request.form.get('cgpa')
-        skills = request.form.get('skills')
-        projects = request.form.get('projects')
-        courses = request.form.get('courses')
-        github_url = request.form.get('github_url')
-        linkedin_url = request.form.get('linkedin_url')
-        preferred_role = request.form.get('preferred_role')
-        preferred_location = request.form.get('preferred_location')
+        name = (request.form.get('name') or '').strip()
+        email = (request.form.get('email') or '').strip()
+        college = (request.form.get('college') or '').strip()
+        cgpa = (request.form.get('cgpa') or '').strip()
+        courses = (request.form.get('courses') or '').strip()
+        course_duration = (request.form.get('course_duration') or '').strip()
+        current_semester = (request.form.get('current_semester') or '').strip()
+        target_semester = (request.form.get('target_semester') or '').strip()
+        internship_duration = (request.form.get('internship_duration') or '').strip()
+        stipend_expectation = (request.form.get('stipend_expectation') or '').strip()
+        skills = (request.form.get('skills') or '').strip()
+        projects = (request.form.get('projects') or '').strip()
+        github_url = (request.form.get('github_url') or '').strip()
+        linkedin_url = (request.form.get('linkedin_url') or '').strip()
+        preferred_role = (request.form.get('preferred_role') or '').strip()
+        preferred_location = (request.form.get('preferred_location') or '').strip()
+
+        if not name or not email or not skills:
+            flash('Name, email, and technical skills are required.', 'error')
+            db.close()
+            return redirect(url_for('student_profile'))
 
         existing_profile = db.execute('SELECT * FROM profiles WHERE user_id = ?', (user_id,)).fetchone()
 
         if existing_profile:
             db.execute('''
                 UPDATE profiles 
-                SET name = ?, email = ?, college = ?, cgpa = ?, skills = ?, projects = ?, courses = ?, 
-                    github_url = ?, linkedin_url = ?, preferred_role = ?, preferred_location = ?
+                SET name = ?, email = ?, college = ?, cgpa = ?, courses = ?,
+                    course_duration = ?, current_semester = ?, target_semester = ?,
+                    internship_duration = ?, stipend_expectation = ?,
+                    skills = ?, projects = ?, github_url = ?, linkedin_url = ?,
+                    preferred_role = ?, preferred_location = ?,
+                    updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = ?
-            ''', (name, email, college, cgpa, skills, projects, courses, github_url, linkedin_url, 
-                  preferred_role, preferred_location, user_id))
+            ''', (
+                name, email, college, cgpa, courses,
+                course_duration, current_semester, target_semester,
+                internship_duration, stipend_expectation,
+                skills, projects, github_url, linkedin_url,
+                preferred_role, preferred_location, user_id
+            ))
         else:
             db.execute('''
-                INSERT INTO profiles (user_id, name, email, college, cgpa, skills, projects, courses, 
-                                      github_url, linkedin_url, preferred_role, preferred_location)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (user_id, name, email, college, cgpa, skills, projects, courses, 
-                  github_url, linkedin_url, preferred_role, preferred_location))
+                INSERT INTO profiles (
+                    user_id, name, email, college, cgpa, courses,
+                    course_duration, current_semester, target_semester,
+                    internship_duration, stipend_expectation,
+                    skills, projects, github_url, linkedin_url,
+                    preferred_role, preferred_location
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                user_id, name, email, college, cgpa, courses,
+                course_duration, current_semester, target_semester,
+                internship_duration, stipend_expectation,
+                skills, projects, github_url, linkedin_url,
+                preferred_role, preferred_location
+            ))
 
         db.commit()
         db.close()
@@ -176,7 +219,7 @@ def generate_recommendations():
     user_id = session.get('user_id')
 
     profile = db.execute('SELECT * FROM profiles WHERE user_id = ?', (user_id,)).fetchone()
-    
+
     if not profile:
         flash('Please complete your profile before viewing opportunity matches.', 'error')
         db.close()
@@ -187,15 +230,24 @@ def generate_recommendations():
 
     existing_rec = db.execute('SELECT * FROM ai_recommendations WHERE student_id = ?', (user_id,)).fetchone()
     if existing_rec:
-        db.execute('UPDATE ai_recommendations SET recommendations_json = ? WHERE student_id = ?', 
-                   (recommendations_json_str, user_id))
+        db.execute(
+            'UPDATE ai_recommendations SET recommendations_json = ?, updated_at = CURRENT_TIMESTAMP WHERE student_id = ?',
+            (recommendations_json_str, user_id)
+        )
     else:
-        db.execute('INSERT INTO ai_recommendations (student_id, recommendations_json) VALUES (?, ?)', 
-                   (user_id, recommendations_json_str))
+        db.execute(
+            'INSERT INTO ai_recommendations (student_id, recommendations_json) VALUES (?, ?)',
+            (user_id, recommendations_json_str)
+        )
     db.commit()
     db.close()
 
-    return render_template('recommendations.html', recommendations=recommendations, profile=profile, title="Opportunity Matchmaker — InternShip Finder")
+    return render_template(
+        'recommendations.html',
+        recommendations=recommendations,
+        profile=profile,
+        title="Opportunity Matchmaker — InternShip Finder"
+    )
 
 
 @app.route('/admin/dashboard')
