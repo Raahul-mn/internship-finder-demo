@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center my-3">
+    <div class="col-lg-9">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-5">
+                
+                <!-- Header Section -->
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-1">Candidate Profile & Portfolio</h3>
+                        <p class="text-muted mb-0">Keep your professional details updated for precise AI internship matching.</p>
+                    </div>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    
+                    <!-- Section 1: Basic Information -->
+                    <h5 class="fw-semibold text-primary mb-3">1. Personal & Academic Details</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label fw-medium text-secondary">Full Name *</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g. Alex Morgan" value="{{ profile.name if profile else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium text-secondary">Email Address *</label>
+                            <input type="email" name="email" class="form-control" placeholder="alex.morgan@example.com" value="{{ profile.email if profile else '' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-medium text-secondary">College / University</label>
+                        <input type="text" name="college" class="form-control" placeholder="e.g. Institute of Technology & Science" value="{{ profile.college if profile else '' }}">
+                    </div>
+
+                    <!-- Academic Score & Type -->
+                    <!-- Academic Score & Type -->
+         <!-- Academic Score & Type -->
+<!-- Academic Details Section -->
+<div class="mb-3">
+    <label for="cgpa" class="form-label fw-semibold">CGPA / Percentage</label>
+    <input type="text" class="form-control rounded-3" id="cgpa" name="cgpa" value="{{ profile.cgpa if profile else '' }}" placeholder="e.g., 8.5 CGPA or 62%">
+    <div class="form-text text-muted">Enter your aggregate CGPA (e.g., 8.2) or percentage (e.g., 78%).</div>
+</div>
+                    <!-- Section 2: Professional Links -->
+                    <h5 class="fw-semibold text-primary mb-3">2. Professional Profiles</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label fw-medium text-secondary">GitHub Profile URL</label>
+                            <input type="url" name="github_url" class="form-control" placeholder="https://github.com/username" value="{{ profile.github_url if profile else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium text-secondary">LinkedIn Profile URL</label>
+                            <input type="url" name="linkedin_url" class="form-control" placeholder="https://linkedin.com/in/username" value="{{ profile.linkedin_url if profile else '' }}">
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Skills & Experience -->
+                    <h5 class="fw-semibold text-primary mb-3">3. Skills, Projects & Certifications</h5>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium text-secondary">Technical Skills (Comma-Separated) *</label>
+                        <input type="text" name="skills" class="form-control" placeholder="Python, Flask, SQLite, JavaScript, Git, React" value="{{ profile.skills if profile else '' }}" required>
+                        <div class="form-text text-muted">Example: Python, Flask, SQL, Machine Learning</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium text-secondary">Key Projects</label>
+                        <textarea name="projects" class="form-control" rows="3" placeholder="Describe projects you've built (e.g. Internship Finder Web App - Built with Flask & Bootstrap)...">{{ profile.projects if profile else '' }}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-medium text-secondary">Courses Completed & Certifications</label>
+                        <textarea name="courses" class="form-control" rows="2" placeholder="List certifications or major courses completed (e.g. Meta Back-End Developer Certificate, AWS Cloud Practitioner)...">{{ profile.courses if profile else '' }}</textarea>
+                    </div>
+
+                    <!-- Section 4: Preferences & Resume -->
+                    <h5 class="fw-semibold text-primary mb-3">4. Internship Preferences & Resume</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label fw-medium text-secondary">Preferred Role</label>
+                            <input type="text" name="preferred_role" class="form-control" placeholder="e.g. Software Engineering Intern" value="{{ profile.preferred_role if profile else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium text-secondary">Preferred Location</label>
+                            <input type="text" name="preferred_location" class="form-control" placeholder="e.g. Remote / Bangalore / Mumbai" value="{{ profile.preferred_location if profile else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-medium text-secondary">Upload Resume (PDF or TXT, Max 2MB)</label>
+                        <input type="file" name="resume" class="form-control" accept=".pdf,.txt">
+                        {% if profile and profile.resume_filename %}
+                            <div class="form-text text-success mt-1">📄 Currently stored resume: <strong>{{ profile.resume_filename }}</strong></div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit Action -->
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg py-3 fw-semibold rounded-3 shadow-sm">Save Profile & Continue</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

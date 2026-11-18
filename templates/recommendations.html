@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-lg-10">
+        
+        <!-- Header Card -->
+        <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white">
+            <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">🎯 Smart Internship Match & Opportunity Dashboard</h3>
+                    <p class="text-muted mb-0">Exact company openings and tailored hiring roadmaps for <strong>{{ profile.name }}</strong>.</p>
+                </div>
+                <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary btn-sm px-3 shadow-sm rounded-pill">← Dashboard</a>
+            </div>
+        </div>
+
+        {% if recommendations is mapping and recommendations.opportunities %}
+            <!-- SECTION 1: Exact Company Matches & Tiers -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4 border-start border-primary border-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-4">🏢 Where You Can Apply (Target Companies & Tiers)</h5>
+                    <div class="row g-4">
+                        {% for opp in recommendations.opportunities %}
+                            <div class="col-md-6">
+                                <div class="p-4 border rounded-4 bg-light h-100 shadow-sm d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="badge bg-primary text-white mb-3 px-3 py-2 rounded-pill fw-semibold">{{ opp.company_tier | default('Target Tier') }}</div>
+                                        <h5 class="fw-bold text-dark mb-3">{{ opp.matched_role or opp.title }}</h5>
+                                        
+                                        <!-- Company Name Badges (Supports both old and new cache keys) -->
+                                        <div class="mb-3">
+                                            <span class="small text-muted fw-bold d-block mb-2">📍 Target Companies:</span>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                {% set raw_comps = opp.companies or opp.company_names or opp.company or "Zoho, Freshworks, Postman, Razorpay" %}
+                                                {% set comp_list = raw_comps if raw_comps is iterable and raw_comps is not string else raw_comps.split(',') %}
+                                                {% for comp in comp_list %}
+                                                    <span class="badge bg-white text-dark border px-2 py-1 small shadow-sm">{{ comp.strip() }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Eligibility Points (Supports both lists and text strings) -->
+                                    <div class="p-3 bg-white rounded-3 border shadow-sm">
+                                        <span class="small text-success fw-bold d-block mb-1">💡 Why You're Eligible:</span>
+                                        <ul class="mb-0 ps-3 small text-muted">
+                                            {% set raw_points = opp.eligibility_points or opp.why_eligible or opp.match_reason or ["Your verified technical skills match enterprise backend requirements."] %}
+                                            {% set points = raw_points if raw_points is iterable and raw_points is not string else [raw_points] %}
+                                            {% for pt in points %}
+                                                <li class="mb-1">{{ pt }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Visual Selection Workflows -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4 border-start border-info border-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-4">📋 Company-Specific Selection Workflows</h5>
+                    
+                    {% for wf in recommendations.workflows or recommendations.workflow %}
+                        <div class="mb-4 p-4 rounded-4 bg-light border">
+                            <span class="badge bg-dark text-white px-3 py-2 rounded-pill mb-3 fw-semibold">{{ wf.target_type or 'Hiring Pipeline' }}</span>
+                            
+                            <!-- Timeline Pipeline Grid -->
+                            <div class="row g-3 mt-1">
+                                {% set raw_steps = wf.steps or wf.detail or "1. Apply via Portal -> 2. Online Assessment -> 3. Technical Interview" %}
+                                {% set steps_list = raw_steps if raw_steps is iterable and raw_steps is not string else raw_steps.split('->') %}
+                                {% for step in steps_list %}
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="p-3 bg-white rounded-3 border h-100 shadow-sm position-relative d-flex flex-column justify-content-between">
+                                            <div>
+                                                <span class="badge bg-primary-subtle text-primary fw-bold mb-2 rounded-pill px-2">Stage {{ loop.index }}</span>
+                                                <p class="small text-secondary mb-0 fw-medium">{{ step.strip() }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- SECTION 3: Profile Optimization Insights -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4 border-start border-warning border-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-3">💡 GitHub & LinkedIn Profile Optimization</h5>
+                    <div class="list-group list-group-flush">
+                        {% for insight in recommendations.profile_insights or recommendations.portfolio_tips %}
+                            <div class="list-group-item bg-transparent px-0 py-2 border-0 d-flex align-items-start">
+                                <span class="text-warning me-2 fs-5">▪</span>
+                                <span class="text-secondary small lh-base">{{ insight }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Action Bar -->
+        <div class="d-flex justify-content-end">
+            <form action="{{ url_for('generate_recommendations') }}" method="GET">
+                <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm rounded-pill">🔄 Refresh Opportunity Match</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
