@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .si-wrap { max-width: 960px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, -apple-system, sans-serif; color: #1e293b; }
+  .si-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+  .si-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
+  .si-btn { padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; }
+  .si-btn-primary { background: #2563eb; color: #ffffff; }
+  .si-btn-danger { background: #fee2e2; color: #991b1b; }
+  .si-btn-secondary { background: #f1f5f9; color: #334155; }
+</style>
+
+<div class="si-wrap">
+  <div class="si-header">
+    <div>
+      <h2 style="margin:0; font-size:1.5rem; color:#0f172a;">Saved Internships</h2>
+      <p style="margin:0.2rem 0 0; color:#64748b; font-size:0.9rem;">Your bookmarked opportunities ready for review and application.</p>
+    </div>
+    <div style="display:flex; gap:0.6rem;">
+      <a href="{{ url_for('browse_internships') }}" class="si-btn si-btn-primary">Browse More</a>
+      <a href="{{ url_for('student_dashboard') }}" class="si-btn si-btn-secondary">Dashboard</a>
+    </div>
+  </div>
+
+  {% if saved_internships %}
+    {% for item in saved_internships %}
+      <div class="si-card">
+        <div>
+          <h3 style="margin:0; font-size:1.1rem; color:#0f172a;">{{ item['title'] }}</h3>
+          <div style="color:#2563eb; font-weight:600; font-size:0.9rem; margin-top:0.15rem;">
+            {{ item['company_name'] }} &bull; {{ item['location'] or 'India' }} ({{ item['work_mode'] }})
+          </div>
+          <div style="font-size:0.82rem; color:#64748b; margin-top:0.35rem;">
+            Stipend: {{ item['stipend_type'] }}{% if item['stipend_amount'] %} ({{ item['stipend_amount'] }}){% endif %}
+            {% if item['duration'] %} &bull; Duration: {{ item['duration'] }}{% endif %}
+          </div>
+        </div>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <a href="{{ url_for('internship_details', internship_id=item['id']) }}" class="si-btn si-btn-primary">View / Apply</a>
+          <form method="POST" action="{{ url_for('unsave_internship', internship_id=item['id']) }}" style="margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="si-btn si-btn-danger">Remove</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="si-card" style="justify-content:center; text-align:center; padding:2.5rem;">
+      <div>
+        <h4 style="margin:0 0 0.5rem;">No bookmarked internships yet</h4>
+        <p style="color:#64748b; margin:0 0 1rem;">Explore approved internship listings and bookmark opportunities you want to track.</p>
+        <a href="{{ url_for('browse_internships') }}" class="si-btn si-btn-primary">Explore Internships</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .il-wrap { max-width: 1080px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, -apple-system, sans-serif; color: #1e293b; }
+  .il-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+  .il-header h2 { margin: 0; font-size: 1.55rem; font-weight: 700; color: #0f172a; }
+  .il-filter-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 2px 10px rgba(15,23,42,0.04); }
+  .il-filter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; }
+  @media (max-width: 768px) { .il-filter-grid { grid-template-columns: 1fr; } }
+  .il-field label { display: block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 0.3rem; }
+  .il-field input, .il-field select { width: 100%; box-sizing: border-box; padding: 0.55rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: #f8fafc; }
+  .il-filter-actions { display: flex; gap: 0.65rem; margin-top: 1rem; }
+  .il-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  @media (max-width: 820px) { .il-cards-grid { grid-template-columns: 1fr; } }
+  .il-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.35rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 8px rgba(15,23,42,0.04); }
+  .il-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.65rem; }
+  .il-title { margin: 0; font-size: 1.15rem; font-weight: 700; color: #0f172a; }
+  .il-company { font-size: 0.9rem; font-weight: 600; color: #2563eb; margin-top: 0.15rem; }
+  .il-badges { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.65rem 0; }
+  .il-badge { font-size: 0.78rem; font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 999px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+  .il-badge-paid { background: #dcfce7; color: #166534; border-color: #86efac; }
+  .il-badge-sample { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+  .il-skills { font-size: 0.85rem; color: #475569; margin: 0.5rem 0 1rem; }
+  .il-card-actions { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding-top: 0.85rem; border-top: 1px solid #f1f5f9; }
+  .il-btn { padding: 0.5rem 0.95rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; display: inline-flex; align-items: center; }
+  .il-btn-primary { background: #2563eb; color: #ffffff; }
+  .il-btn-secondary { background: #f1f5f9; color: #334155; }
+  .il-btn-saved { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+</style>
+
+<div class="il-wrap">
+  <div class="il-header">
+    <div>
+      <h2>Approved Internship Listings</h2>
+      <p style="margin:0.2rem 0 0; color:#64748b; font-size:0.9rem;">Browse verified opportunities, filter by stack or city, and bookmark roles to apply.</p>
+    </div>
+    <div style="display:flex; gap:0.6rem;">
+      {% if session.get('role') == 'student' %}
+        <a href="{{ url_for('saved_internships') }}" class="il-btn il-btn-saved">Saved Internships ({{ bookmarked_ids|length }})</a>
+        <a href="{{ url_for('student_dashboard') }}" class="il-btn il-btn-secondary">Dashboard</a>
+      {% elif session.get('role') == 'admin' %}
+        <a href="{{ url_for('admin_internships') }}" class="il-btn il-btn-primary">Manage Listings</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Search & Filter Form -->
+  <form method="GET" action="{{ url_for('browse_internships') }}" class="il-filter-card">
+    <div class="il-filter-grid">
+      <div class="il-field">
+        <label>Keyword (Role / Company)</label>
+        <input type="text" name="q" value="{{ filters.q }}" placeholder="e.g., Python, Zoho, Backend">
+      </div>
+      <div class="il-field">
+        <label>Work Mode</label>
+        <select name="work_mode">
+          <option value="">All Work Modes</option>
+          <option value="Remote" {% if filters.work_mode == 'Remote' %}selected{% endif %}>Remote</option>
+          <option value="On-site" {% if filters.work_mode == 'On-site' %}selected{% endif %}>On-site</option>
+          <option value="Hybrid" {% if filters.work_mode == 'Hybrid' %}selected{% endif %}>Hybrid</option>
+        </select>
+      </div>
+      <div class="il-field">
+        <label>Stipend Type</label>
+        <select name="stipend_type">
+          <option value="">All Stipend Types</option>
+          <option value="Paid" {% if filters.stipend_type == 'Paid' %}selected{% endif %}>Paid</option>
+          <option value="Unpaid" {% if filters.stipend_type == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+          <option value="Not specified" {% if filters.stipend_type == 'Not specified' %}selected{% endif %}>Not specified</option>
+        </select>
+      </div>
+      <div class="il-field">
+        <label>Location</label>
+        <input type="text" name="location" value="{{ filters.location }}" placeholder="e.g., Chennai, Bengaluru">
+      </div>
+      <div class="il-field">
+        <label>Duration</label>
+        <input type="text" name="duration" value="{{ filters.duration }}" placeholder="e.g., 2 Months, 6 Months">
+      </div>
+      <div class="il-field">
+        <label>Required Skills</label>
+        <input type="text" name="skills" value="{{ filters.skills }}" placeholder="e.g., Python, Flask, SQL">
+      </div>
+    </div>
+    <div class="il-filter-actions">
+      <button type="submit" class="il-btn il-btn-primary">Search &amp; Filter</button>
+      <a href="{{ url_for('browse_internships') }}" class="il-btn il-btn-secondary">Reset Filters</a>
+    </div>
+  </form>
+
+  {% if internships %}
+    <div class="il-cards-grid">
+      {% for item in internships %}
+        <div class="il-card">
+          <div>
+            <div class="il-card-top">
+              <div>
+                <h3 class="il-title">{{ item['title'] }}</h3>
+                <div class="il-company">{{ item['company_name'] }}</div>
+              </div>
+              {% if item['is_sample_listing'] %}
+                <span class="il-badge il-badge-sample">Sample Listing</span>
+              {% endif %}
+            </div>
+
+            <div class="il-badges">
+              <span class="il-badge">{{ item['location'] or 'India' }}</span>
+              <span class="il-badge">{{ item['work_mode'] }}</span>
+              {% if item['duration'] %}
+                <span class="il-badge">{{ item['duration'] }}</span>
+              {% endif %}
+              <span class="il-badge {{ 'il-badge-paid' if item['stipend_type'] == 'Paid' else '' }}">
+                {{ item['stipend_type'] }}{% if item['stipend_amount'] %} ({{ item['stipend_amount'] }}){% endif %}
+              </span>
+            </div>
+
+            <div class="il-skills">
+              <strong>Skills:</strong> {{ item['required_skills'] or 'General Software Skills' }}
+            </div>
+          </div>
+
+          <div class="il-card-actions">
+            <a href="{{ url_for('internship_details', internship_id=item['id']) }}" class="il-btn il-btn-primary">View Details</a>
+
+            {% if session.get('role') == 'student' %}
+              <form method="POST" action="{{ url_for('bookmark_internship', internship_id=item['id']) }}" style="margin:0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="next" value="{{ request.full_path }}">
+                {% if item['id'] in bookmarked_ids %}
+                  <button type="submit" class="il-btn il-btn-saved">Bookmarked</button>
+                {% else %}
+                  <button type="submit" class="il-btn il-btn-secondary">Bookmark</button>
+                {% endif %}
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="il-filter-card" style="text-align:center; padding:2.5rem;">
+      <h4 style="margin:0 0 0.5rem;">No approved internships match your filters</h4>
+      <p style="color:#64748b; margin:0;">Try clearing your filters or check back once the admin approves new listings.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

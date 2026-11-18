@@ -1,5 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Employer / Admin Dashboard</h2><p class="text-muted">Welcome administrator, {{ session.get('username') }}!</p><hr>
-<div class="alert alert-dark">Manage internship listings, reviews, and applications here.</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="p-5 bg-white rounded-3 shadow-sm border-0 mb-4">
+      <h2 class="fw-bold text-dark">Employer / Admin Dashboard</h2>
+      <p class="text-muted fs-5">Welcome administrator, {{ session.get('email', 'Admin') }}</p>
+      <div class="alert alert-dark">Manage internship listings, reviews, and applications here.</div>
+      <hr class="my-4">
+      <div class="d-flex gap-3 flex-wrap">
+        <a href="{{ url_for('admin_internships') }}" class="btn btn-primary px-4 py-2">
+          Manage Internship Listings ({{ total_listings or 0 }})
+        </a>
+        <a href="{{ url_for('admin_new_internship') }}" class="btn btn-success px-4 py-2">
+          + Add New Listing
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .id-wrap { max-width: 860px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, -apple-system, sans-serif; color: #1e293b; }
+  .id-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.75rem; box-shadow: 0 4px 16px rgba(15,23,42,0.05); }
+  .id-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; margin-bottom: 1.25rem; }
+  .id-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; background: #f8fafc; padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem; font-size: 0.9rem; }
+  @media (max-width: 640px) { .id-grid { grid-template-columns: 1fr; } }
+  .id-section { margin-bottom: 1.25rem; line-height: 1.6; }
+  .id-section h4 { margin: 0 0 0.4rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.03em; color: #2563eb; }
+  .id-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #f1f5f9; }
+  .id-btn { padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; display: inline-flex; align-items: center; }
+  .id-btn-primary { background: #2563eb; color: #ffffff; }
+  .id-btn-saved { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .id-btn-secondary { background: #f1f5f9; color: #334155; }
+</style>
+
+<div class="id-wrap">
+  <div class="id-card">
+    <div class="id-top">
+      <div>
+        <h2 style="margin:0; font-size:1.5rem; color:#0f172a;">{{ internship['title'] }}</h2>
+        <div style="font-size:1rem; font-weight:600; color:#2563eb; margin-top:0.25rem;">
+          {{ internship['company_name'] }}
+          {% if internship['company_type'] %} &bull; {{ internship['company_type'] }}{% endif %}
+        </div>
+      </div>
+      {% if internship['is_sample_listing'] %}
+        <span style="background:#fef3c7; color:#92400e; padding:0.35rem 0.75rem; border-radius:999px; font-size:0.8rem; font-weight:700;">Sample Listing</span>
+      {% endif %}
+    </div>
+
+    <div class="id-grid">
+      <div><strong>Location:</strong> {{ internship['location'] or 'India' }}</div>
+      <div><strong>Work Mode:</strong> {{ internship['work_mode'] }}</div>
+      <div><strong>Duration:</strong> {{ internship['duration'] or 'Not specified' }}</div>
+      <div><strong>Stipend:</strong> {{ internship['stipend_type'] }}{% if internship['stipend_amount'] %} ({{ internship['stipend_amount'] }}){% endif %}</div>
+    </div>
+
+    <div class="id-section">
+      <h4>Required Skills</h4>
+      <p style="margin:0;">{{ internship['required_skills'] or 'Not specified' }}</p>
+    </div>
+
+    <div class="id-section">
+      <h4>Eligibility Criteria</h4>
+      <p style="margin:0;">{{ internship['eligibility'] or 'Open to eligible students.' }}</p>
+    </div>
+
+    <div class="id-section">
+      <h4>Role Description</h4>
+      <p style="margin:0; white-space:pre-line;">{{ internship['description'] }}</p>
+    </div>
+
+    {% if internship['application_link'] %}
+      <div class="id-section">
+        <h4>External Reference Link</h4>
+        <a href="{{ internship['application_link'] }}" target="_blank" rel="noopener noreferrer">{{ internship['application_link'] }}</a>
+      </div>
+    {% endif %}
+
+    <div class="id-actions">
+      {% if session.get('role') == 'student' %}
+        <form method="POST" action="{{ url_for('bookmark_internship', internship_id=internship['id']) }}" style="margin:0;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="next" value="{{ url_for('internship_details', internship_id=internship['id']) }}">
+          <button type="submit" class="id-btn {{ 'id-btn-saved' if is_bookmarked else 'id-btn-secondary' }}">
+            {{ 'Remove Bookmark' if is_bookmarked else 'Bookmark Internship' }}
+          </button>
+        </form>
+        <a href="{{ url_for('browse_internships') }}" class="id-btn id-btn-primary">Ready to Apply (Milestone 7)</a>
+      {% endif %}
+      <a href="{{ url_for('browse_internships') }}" class="id-btn id-btn-secondary">&larr; Back to Listings</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

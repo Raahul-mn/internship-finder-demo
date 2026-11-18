@@ -2,13 +2,13 @@
 {% block content %}
 <style>
   .rec-wrap {
-    max-width: 980px;
+    max-width: 1060px;
     margin: 2rem auto;
     padding: 0 1rem;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     color: #1e293b;
   }
-  .rec-header {
+  .rec-top-bar {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -16,362 +16,517 @@
     gap: 1rem;
     margin-bottom: 1.25rem;
   }
-  .rec-header h2 {
+  .rec-top-bar h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: #0f172a;
   }
-  .rec-engine-pill {
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 0.4rem 0.85rem;
-    border-radius: 999px;
-  }
-  .rec-engine-live {
+  .rec-pill-live {
     background: #dcfce7;
     color: #166534;
     border: 1px solid #86efac;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
   }
-  .rec-engine-fallback {
+  .rec-pill-fallback {
     background: #fef3c7;
     color: #92400e;
     border: 1px solid #fcd34d;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
   }
-  .rec-summary-bar {
+  .rec-snapshot {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
-    background: #f8fafc;
+    background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 1rem 1.25rem;
     margin-bottom: 1rem;
   }
   @media (max-width: 768px) {
-    .rec-summary-bar {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    .rec-snapshot { grid-template-columns: repeat(2, 1fr); }
   }
-  .rec-stat-label {
-    font-size: 0.75rem;
+  .rec-snap-label {
+    font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: #64748b;
-    font-weight: 600;
+    font-weight: 700;
   }
-  .rec-stat-val {
-    font-size: 0.95rem;
+  .rec-snap-val {
+    font-size: 0.92rem;
     font-weight: 700;
     color: #0f172a;
-    margin-top: 0.15rem;
+    margin-top: 0.2rem;
   }
-  .rec-band-note {
-    background: #eff6ff;
-    border-left: 4px solid #2563eb;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    color: #1e3a8a;
-    margin-bottom: 1.5rem;
-  }
-  .rec-opp-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+  .rec-need-bar {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
   }
-  .rec-opp-top {
+  .rec-need-bar input {
+    flex: 1;
+    min-width: 240px;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: #ffffff;
+  }
+  .rec-tier-block {
+    margin-bottom: 2.25rem;
+  }
+  .rec-tier-head {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding-bottom: 0.9rem;
-    border-bottom: 1px solid #f1f5f9;
+    align-items: center;
+    gap: 0.5rem;
     margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid #e2e8f0;
   }
-  .rec-role-title {
+  .rec-tier-head h3 {
     margin: 0;
     font-size: 1.2rem;
     font-weight: 700;
     color: #0f172a;
   }
   .rec-tier-sub {
-    margin: 0.25rem 0 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #2563eb;
-  }
-  .rec-score-badge {
-    background: #0f172a;
-    color: #ffffff;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.4rem 0.85rem;
-    border-radius: 8px;
-    white-space: nowrap;
-  }
-  .rec-meta-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
-  @media (max-width: 768px) {
-    .rec-meta-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  .rec-meta-box {
-    background: #f8fafc;
-    border-radius: 8px;
-    padding: 0.75rem 0.9rem;
     font-size: 0.85rem;
-    line-height: 1.45;
-  }
-  .rec-meta-box strong {
-    display: block;
-    color: #334155;
-    margin-bottom: 0.2rem;
-  }
-  .rec-companies-row {
-    margin-bottom: 1rem;
-  }
-  .rec-companies-label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
     color: #64748b;
-    margin-bottom: 0.5rem;
+    margin-top: 0.2rem;
   }
-  .rec-company-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .rec-company-pill {
-    background: #f1f5f9;
-    color: #0f172a;
-    border: 1px solid #cbd5e1;
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 0.35rem 0.75rem;
-    border-radius: 6px;
-  }
-  .rec-points {
-    margin: 0;
-    padding-left: 1.25rem;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: #334155;
-  }
-  .rec-points li {
-    margin-bottom: 0.35rem;
-  }
-  .rec-bottom-grid {
+  .rec-cards-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
   }
-  @media (max-width: 768px) {
-    .rec-bottom-grid {
-      grid-template-columns: 1fr;
-    }
+  @media (max-width: 820px) {
+    .rec-cards-grid { grid-template-columns: 1fr; }
   }
-  .rec-subcard {
+  .rec-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.25rem;
+    border-radius: 14px;
+    padding: 1.35rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
   }
-  .rec-subcard h4 {
-    margin: 0 0 0.85rem;
-    font-size: 1rem;
+  .rec-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .rec-comp-name {
+    margin: 0;
+    font-size: 1.15rem;
     font-weight: 700;
     color: #0f172a;
   }
-  .rec-wf-item {
-    margin-bottom: 0.9rem;
-    padding-bottom: 0.9rem;
-    border-bottom: 1px solid #f1f5f9;
-  }
-  .rec-wf-item:last-child {
-    margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: none;
-  }
-  .rec-wf-title {
-    font-size: 0.875rem;
-    font-weight: 700;
+  .rec-comp-role {
+    font-size: 0.9rem;
+    font-weight: 600;
     color: #2563eb;
-    margin-bottom: 0.35rem;
+    margin-top: 0.15rem;
   }
-  .rec-wf-steps {
-    margin: 0;
-    padding-left: 1.2rem;
-    font-size: 0.85rem;
-    color: #475569;
-    line-height: 1.5;
-  }
-  .rec-disclaimer {
+  .rec-match-pill {
+    background: #dcfce7;
+    color: #166534;
+    font-weight: 700;
     font-size: 0.8rem;
-    color: #64748b;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .rec-audit-list {
     background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1.25rem;
+    border-radius: 10px;
+    padding: 0.8rem 0.95rem;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: #334155;
+    margin-bottom: 0.85rem;
   }
-  .rec-footer-actions {
+  .rec-audit-list div + div {
+    margin-top: 0.35rem;
+  }
+  .rec-tags-row {
     display: flex;
-    gap: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
   }
-  .rec-btn-primary {
+  .rec-tag-match {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+  }
+  .rec-tag-gap {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+  }
+  .rec-card-actions {
+    display: flex;
+    gap: 0.6rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid #f1f5f9;
+  }
+  .rec-btn {
+    flex: 1;
+    padding: 0.55rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+  }
+  .rec-btn-wish {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+  }
+  .rec-btn-apply {
     background: #2563eb;
     color: #ffffff;
-    text-decoration: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
   }
-  .rec-btn-secondary {
+  .rec-btn-applied {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+  }
+  .rec-btn-neutral {
     background: #f1f5f9;
     color: #334155;
-    text-decoration: none;
-    padding: 0.6rem 1.2rem;
+  }
+  details.rec-strategy-drawer {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  details.rec-strategy-drawer summary {
+    font-weight: 700;
+    color: #0f172a;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  .rec-modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 1050;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .rec-modal-box {
+    background: #ffffff;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+  }
+  .rec-modal-field {
+    margin-bottom: 0.9rem;
+  }
+  .rec-modal-field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 0.3rem;
+  }
+  .rec-modal-field input,
+  .rec-modal-field select,
+  .rec-modal-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
     font-size: 0.9rem;
-    font-weight: 600;
+    background: #f8fafc;
   }
 </style>
 
 <div class="rec-wrap">
-  <div class="rec-header">
-    <h2>AI Opportunity Matchmaker</h2>
-    {% if recommendations.engine_source %}
-      <span class="rec-engine-pill {{ 'rec-engine-live' if 'Gemini Live AI' in recommendations.engine_source else 'rec-engine-fallback' }}">
-        {{ recommendations.engine_source }}
-      </span>
-    {% endif %}
-  </div>
-
-  <!-- Compact 4-Column Profile Snapshot -->
-  <div class="rec-summary-bar">
+  <div class="rec-top-bar">
     <div>
-      <div class="rec-stat-label">Target Location</div>
-      <div class="rec-stat-val">{{ profile['preferred_location'] or 'India / Remote' }}</div>
+      <h2>AI Opportunity Matchmaker</h2>
+      <div style="font-size:0.88rem; color:#64748b; margin-top:0.2rem;">
+        {{ recommendations.academic_band }}
+      </div>
     </div>
-    <div>
-      <div class="rec-stat-label">CGPA Standing</div>
-      <div class="rec-stat-val">{{ profile['cgpa'] or 'Not specified' }}</div>
-    </div>
-    <div>
-      <div class="rec-stat-label">Semester Window</div>
-      <div class="rec-stat-val">{{ profile['current_semester'] or 'Current' }} &rarr; {{ profile['target_semester'] or 'Target' }}</div>
-    </div>
-    <div>
-      <div class="rec-stat-label">Duration &amp; Stipend</div>
-      <div class="rec-stat-val">{{ profile['internship_duration'] or 'Flexible' }} ({{ profile['stipend_expectation'] or 'Standard' }})</div>
+    <div style="display:flex; gap:0.6rem; align-items:center;">
+      <a href="{{ url_for('saved_internships') }}" class="rec-btn rec-btn-neutral" style="flex:none;">Saved Wishlist &amp; Entries</a>
+      {% if recommendations.engine_source %}
+        <span class="{{ 'rec-pill-live' if 'Gemini Live AI' in recommendations.engine_source else 'rec-pill-fallback' }}">
+          {{ recommendations.engine_source }}
+        </span>
+      {% endif %}
     </div>
   </div>
 
-  {% if recommendations.academic_band %}
-    <div class="rec-band-note">
-      <strong>Academic Calibration:</strong> {{ recommendations.academic_band }}
+  <!-- Compact 4-Column Calibration Strip -->
+  <div class="rec-snapshot">
+    <div>
+      <div class="rec-snap-label">Target Location</div>
+      <div class="rec-snap-val">{{ profile['preferred_location'] or 'India / Remote' }}</div>
     </div>
-  {% endif %}
+    <div>
+      <div class="rec-snap-label">CGPA &amp; Coursework</div>
+      <div class="rec-snap-val">{{ profile['cgpa'] or 'N/A' }} &bull; {{ (profile['courses'] or 'CS Core')[:28] }}</div>
+    </div>
+    <div>
+      <div class="rec-snap-label">Semester &amp; Duration</div>
+      <div class="rec-snap-val">{{ profile['target_semester'] or 'Upcoming' }} ({{ profile['internship_duration'] or '2-6M' }})</div>
+    </div>
+    <div>
+      <div class="rec-snap-label">Stipend Target</div>
+      <div class="rec-snap-val">{{ profile['stipend_expectation'] or 'Paid / Standard' }}</div>
+    </div>
+  </div>
 
-  <!-- Matched Opportunity Cards -->
+  <!-- Quick "What I Need" Refinement Bar -->
+  <form method="POST" action="{{ url_for('generate_recommendations') }}" class="rec-need-bar">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <span style="font-size:0.82rem; font-weight:700; color:#1e3a8a; text-transform:uppercase;">What I Need:</span>
+    <input type="text" name="what_i_need" value="{{ recommendations.active_need or profile['what_i_need'] or '' }}" placeholder="e.g., Paid Python backend API role in Chennai for 2 months...">
+    <button type="submit" class="rec-btn rec-btn-apply" style="flex:none; padding:0.55rem 1.1rem;">Refine Matches</button>
+  </form>
+
+  <!-- Clean Company Opportunity Cards -->
   {% for opp in recommendations.opportunities %}
-    <div class="rec-opp-card">
-      <div class="rec-opp-top">
+    <div class="rec-tier-block">
+      <div class="rec-tier-head">
         <div>
-          <h3 class="rec-role-title">{{ opp.matched_role }}</h3>
-          <div class="rec-tier-sub">{{ opp.company_tier }}</div>
-        </div>
-        {% if opp.match_score is not none %}
-          <span class="rec-score-badge">Estimated Match: {{ opp.match_score }}%</span>
-        {% else %}
-          <span class="rec-score-badge">Match score unavailable</span>
-        {% endif %}
-      </div>
-
-      <div class="rec-meta-grid">
-        {% if opp.location_fit %}
-          <div class="rec-meta-box">
-            <strong>Location Match ({{ profile['preferred_location'] or 'India' }})</strong>
-            {{ opp.location_fit }}
-          </div>
-        {% endif %}
-        {% if opp.timeline_fit %}
-          <div class="rec-meta-box">
-            <strong>Semester, Duration &amp; Stipend Fit</strong>
-            {{ opp.timeline_fit }}
-          </div>
-        {% endif %}
-      </div>
-
-      <div class="rec-companies-row">
-        <div class="rec-companies-label">Example Target Companies (Career Guidance)</div>
-        <div class="rec-company-pills">
-          {% for comp in opp.companies %}
-            <span class="rec-company-pill">{{ comp }}</span>
-          {% endfor %}
+          <h3>{{ opp.company_tier }}</h3>
+          <div class="rec-tier-sub">{{ opp.location_fit }} &bull; {{ opp.timeline_fit }}</div>
         </div>
       </div>
 
-      <ul class="rec-points">
-        {% for point in opp.eligibility_points %}
-          <li>{{ point }}</li>
+      <div class="rec-cards-grid">
+        {% for card in opp.company_cards %}
+          {% set pair_key = card.company_name ~ '|' ~ card.role_title %}
+          <div class="rec-card">
+            <div>
+              <div class="rec-card-header">
+                <div>
+                  <h4 class="rec-comp-name">{{ card.company_name }}</h4>
+                  <div class="rec-comp-role">{{ card.role_title }} &bull; {{ card.work_mode or 'Hybrid' }}</div>
+                </div>
+                <span class="rec-match-pill">{{ card.match_score }}% Match</span>
+              </div>
+
+              <div class="rec-audit-list">
+                <div><strong>CGPA &amp; Courses:</strong> {{ card.cgpa_cutoff_note }}{% if card.coursework_fit %} ({{ card.coursework_fit }}){% endif %}</div>
+                <div><strong>Project Pitch:</strong> {{ card.project_alignment }}</div>
+                {% if card.stipend_duration_fit %}
+                  <div><strong>Need &amp; Stipend Fit:</strong> {{ card.stipend_duration_fit }}</div>
+                {% endif %}
+              </div>
+
+              <div class="rec-tags-row">
+                {% for s in card.matching_skills %}
+                  <span class="rec-tag-match">&check; {{ s }}</span>
+                {% endfor %}
+                {% for g in card.skill_gaps %}
+                  <span class="rec-tag-gap">+ Learn: {{ g }}</span>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="rec-card-actions">
+              <button
+                type="button"
+                class="rec-btn rec-btn-wish"
+                data-company="{{ card.company_name }}"
+                data-role="{{ card.role_title }}"
+                data-mode="{{ card.work_mode or 'Hybrid' }}"
+                data-skills="{{ card.matching_skills | join(', ') }}"
+                data-pitch="{{ card.project_alignment }}"
+                onclick="openOpportunityModal(this, 'wishlist')">
+                + Wishlist
+              </button>
+
+              {% if pair_key in applied_pairs %}
+                <a href="{{ url_for('saved_internships') }}" class="rec-btn rec-btn-applied">Entry Submitted &check;</a>
+              {% else %}
+                <button
+                  type="button"
+                  class="rec-btn rec-btn-apply"
+                  data-company="{{ card.company_name }}"
+                  data-role="{{ card.role_title }}"
+                  data-mode="{{ card.work_mode or 'Hybrid' }}"
+                  data-skills="{{ card.matching_skills | join(', ') }}"
+                  data-pitch="{{ card.project_alignment }}"
+                  onclick="openOpportunityModal(this, 'apply')">
+                  Create &amp; Apply Entry
+                </button>
+              {% endif %}
+            </div>
+          </div>
         {% endfor %}
-      </ul>
+      </div>
     </div>
   {% endfor %}
 
-  <!-- Workflows & Academic Insights Side by Side -->
-  <div class="rec-bottom-grid">
-    {% if recommendations.workflows %}
-      <div class="rec-subcard">
-        <h4>Expected Selection Workflows</h4>
-        {% for wf in recommendations.workflows %}
-          <div class="rec-wf-item">
-            <div class="rec-wf-title">{{ wf.target_type }}</div>
-            <ol class="rec-wf-steps">
-              {% for step in wf.steps %}
-                <li>{{ step }}</li>
-              {% endfor %}
-            </ol>
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    {% if recommendations.profile_insights %}
-      <div class="rec-subcard">
-        <h4>Personalized Academic &amp; Timeline Insights</h4>
-        <ul class="rec-points">
+  <!-- Collapsible Insights & Selection Workflows (Keeps Main Cards Un-cluttered) -->
+  <details class="rec-strategy-drawer">
+    <summary>View Selection Workflows &amp; Skill-Gap Action Plan</summary>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem; margin-top:1rem; font-size:0.88rem; color:#334155;">
+      <div>
+        <strong style="color:#0f172a;">Personalized Action Plan</strong>
+        <ul style="margin:0.5rem 0 0; padding-left:1.2rem; line-height:1.6;">
           {% for insight in recommendations.profile_insights %}
             <li>{{ insight }}</li>
           {% endfor %}
         </ul>
       </div>
-    {% endif %}
+      <div>
+        <strong style="color:#0f172a;">Expected Selection Workflows</strong>
+        {% for wf in recommendations.workflows %}
+          <div style="margin-top:0.5rem;">
+            <span style="font-weight:600; color:#2563eb;">{{ wf.target_type }}:</span>
+            <span>{{ wf.steps | join(' &rarr; ') }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </details>
+
+  <div style="font-size:0.8rem; color:#64748b; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.75rem 1rem; margin-bottom:1.25rem;">
+    AI recommendations are for career guidance and skill mapping only. This portal does not guarantee live job openings or external placement.
   </div>
 
-  <div class="rec-disclaimer">
-    AI recommendations are for career guidance and skill mapping only. This portal does not guarantee live job openings or external placement.[cite: 1, 2]
-  </div>
-
-  <div class="rec-footer-actions">
-    <a href="{{ url_for('student_profile') }}" class="rec-btn-primary">Edit Profile Parameters</a>
-    <a href="{{ url_for('student_dashboard') }}" class="rec-btn-secondary">Back to Dashboard</a>
+  <div style="display:flex; gap:0.75rem;">
+    <a href="{{ url_for('student_profile') }}" class="rec-btn rec-btn-neutral" style="flex:none;">Edit Full Profile</a>
+    <a href="{{ url_for('student_dashboard') }}" class="rec-btn rec-btn-neutral" style="flex:none;">Back to Dashboard</a>
   </div>
 </div>
+
+<!-- Pre-Filled Popup Modal for Direct Wishlist or Application Entry -->
+<div id="oppModal" class="rec-modal-bg">
+  <div class="rec-modal-box">
+    <h3 id="oppModalHeading" style="margin:0 0 0.25rem; font-size:1.2rem; color:#0f172a;">Save Opportunity</h3>
+    <p id="oppModalSub" style="margin:0 0 1rem; font-size:0.85rem; color:#64748b;"></p>
+
+    <form method="POST" action="{{ url_for('save_ai_opportunity_entry') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="action_mode" id="oppActionMode" value="wishlist">
+
+      <div class="rec-modal-field">
+        <label>Target Company</label>
+        <input type="text" name="company_name" id="oppCompany" required>
+      </div>
+
+      <div class="rec-modal-field">
+        <label>Role Title</label>
+        <input type="text" name="role_title" id="oppRole" required>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+        <div class="rec-modal-field">
+          <label>Location</label>
+          <input type="text" name="location" value="{{ profile['preferred_location'] or 'India' }}">
+        </div>
+        <div class="rec-modal-field">
+          <label>Work Mode</label>
+          <select name="work_mode" id="oppWorkMode">
+            <option value="Hybrid">Hybrid</option>
+            <option value="On-site">On-site</option>
+            <option value="Remote">Remote</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="rec-modal-field">
+        <label>Matched Skills</label>
+        <input type="text" name="matched_skills" id="oppSkills">
+      </div>
+
+      <div class="rec-modal-field">
+        <label>Project Pitch / Application Note</label>
+        <textarea name="application_note" id="oppNote" rows="3"></textarea>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:0.6rem; margin-top:1rem;">
+        <button type="button" class="rec-btn rec-btn-neutral" style="flex:none;" onclick="closeOpportunityModal()">Cancel</button>
+        <button type="submit" id="oppSubmitBtn" class="rec-btn rec-btn-apply" style="flex:none;">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openOpportunityModal(btn, mode) {
+    const company = btn.getAttribute('data-company');
+    const role = btn.getAttribute('data-role');
+    const workMode = btn.getAttribute('data-mode') || 'Hybrid';
+    const skills = btn.getAttribute('data-skills') || '';
+    const pitch = btn.getAttribute('data-pitch') || '';
+
+    document.getElementById('oppActionMode').value = mode;
+    document.getElementById('oppCompany').value = company;
+    document.getElementById('oppRole').value = role;
+    document.getElementById('oppWorkMode').value = ['Remote', 'On-site', 'Hybrid'].includes(workMode) ? workMode : 'Hybrid';
+    document.getElementById('oppSkills').value = skills;
+    document.getElementById('oppNote').value = pitch;
+
+    const heading = document.getElementById('oppModalHeading');
+    const sub = document.getElementById('oppModalSub');
+    const submitBtn = document.getElementById('oppSubmitBtn');
+
+    if (mode === 'wishlist') {
+      heading.textContent = 'Save to Wishlist';
+      sub.textContent = 'Bookmark this matched role so you can apply whenever ready.';
+      submitBtn.textContent = '+ Save to Wishlist';
+      submitBtn.className = 'rec-btn rec-btn-wish';
+    } else {
+      heading.textContent = 'Create & Submit Application Entry';
+      sub.textContent = 'Logs this entry with Pending status and saves a copy in your tracker.';
+      submitBtn.textContent = 'Submit Entry';
+      submitBtn.className = 'rec-btn rec-btn-apply';
+    }
+
+    document.getElementById('oppModal').style.display = 'flex';
+  }
+
+  function closeOpportunityModal() {
+    document.getElementById('oppModal').style.display = 'none';
+  }
+</script>
 {% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .ai-wrap { max-width: 1120px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, -apple-system, sans-serif; color: #1e293b; }
+  .ai-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+  .ai-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
+  .ai-tab { padding: 0.45rem 0.9rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; background: #f1f5f9; color: #334155; }
+  .ai-tab.active { background: #0f172a; color: #ffffff; }
+  .ai-table-wrap { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow-x: auto; }
+  .ai-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .ai-table th, .ai-table td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  .ai-table th { background: #f8fafc; font-weight: 700; color: #475569; font-size: 0.78rem; text-transform: uppercase; }
+  .ai-status { padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.76rem; font-weight: 700; display: inline-block; }
+  .st-Approved { background: #dcfce7; color: #166534; }
+  .st-Draft { background: #e2e8f0; color: #334155; }
+  .st-Rejected { background: #fee2e2; color: #991b1b; }
+  .st-Expired { background: #fef3c7; color: #92400e; }
+  .ai-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .ai-btn { padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; border: none; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn-blue { background: #2563eb; color: #ffffff; }
+  .btn-green { background: #16a34a; color: #ffffff; }
+  .btn-amber { background: #d97706; color: #ffffff; }
+  .btn-red { background: #dc2626; color: #ffffff; }
+  .btn-gray { background: #f1f5f9; color: #334155; }
+</style>
+
+<div class="ai-wrap">
+  <div class="ai-top">
+    <div>
+      <h2 style="margin:0; font-size:1.5rem; color:#0f172a;">Admin Internship Listing Management</h2>
+      <p style="margin:0.2rem 0 0; color:#64748b; font-size:0.9rem;">Create, edit, approve, reject, or expire internship listings.</p>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:0.6rem;">
+      <a href="{{ url_for('admin_new_internship') }}" class="ai-btn btn-blue" style="padding:0.55rem 1rem; font-size:0.88rem;">+ Add New Listing</a>
+      <form method="POST" action="{{ url_for('admin_seed_samples') }}" style="margin:0;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="ai-btn btn-gray" style="padding:0.55rem 1rem; font-size:0.88rem;">Load Sample Listings</button>
+      </form>
+      <a href="{{ url_for('admin_dashboard') }}" class="ai-btn btn-gray" style="padding:0.55rem 1rem; font-size:0.88rem;">Admin Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Status Filter Tabs -->
+  <div class="ai-tabs">
+    <a href="{{ url_for('admin_internships') }}" class="ai-tab {{ 'active' if not status_filter else '' }}">All</a>
+    {% for st in ['Draft', 'Approved', 'Rejected', 'Expired'] %}
+      <a href="{{ url_for('admin_internships', status=st) }}" class="ai-tab {{ 'active' if status_filter == st else '' }}">{{ st }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="ai-table-wrap">
+    {% if internships %}
+      <table class="ai-table">
+        <thead>
+          <tr>
+            <th>Role &amp; Company</th>
+            <th>Location &amp; Mode</th>
+            <th>Stipend &amp; Duration</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in internships %}
+            <tr>
+              <td>
+                <strong>{{ item['title'] }}</strong>
+                {% if item['is_sample_listing'] %}
+                  <span style="background:#fef3c7; color:#92400e; font-size:0.72rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:999px; margin-left:0.35rem;">Sample Listing</span>
+                {% endif %}
+                <div style="color:#2563eb; font-weight:600; margin-top:0.15rem;">{{ item['company_name'] }}</div>
+              </td>
+              <td>
+                {{ item['location'] or 'India' }}<br>
+                <span style="color:#64748b; font-size:0.8rem;">{{ item['work_mode'] }}</span>
+              </td>
+              <td>
+                {{ item['stipend_type'] }}{% if item['stipend_amount'] %} ({{ item['stipend_amount'] }}){% endif %}<br>
+                <span style="color:#64748b; font-size:0.8rem;">{{ item['duration'] or 'Flexible' }}</span>
+              </td>
+              <td>
+                <span class="ai-status st-{{ item['status'] }}">{{ item['status'] }}</span>
+              </td>
+              <td>
+                <div class="ai-actions">
+                  <a href="{{ url_for('admin_edit_internship', internship_id=item['id']) }}" class="ai-btn btn-gray">Edit</a>
+
+                  {% if item['status'] != 'Approved' %}
+                    <form method="POST" action="{{ url_for('admin_change_internship_status', internship_id=item['id']) }}" style="margin:0;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="status" value="Approved">
+                      <button type="submit" class="ai-btn btn-green">Approve</button>
+                    </form>
+                  {% endif %}
+
+                  {% if item['status'] != 'Rejected' %}
+                    <form method="POST" action="{{ url_for('admin_change_internship_status', internship_id=item['id']) }}" style="margin:0;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="status" value="Rejected">
+                      <button type="submit" class="ai-btn btn-amber">Reject</button>
+                    </form>
+                  {% endif %}
+
+                  {% if item['status'] != 'Expired' %}
+                    <form method="POST" action="{{ url_for('admin_change_internship_status', internship_id=item['id']) }}" style="margin:0;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="status" value="Expired">
+                      <button type="submit" class="ai-btn btn-gray">Expire</button>
+                    </form>
+                  {% endif %}
+
+                  <form method="POST" action="{{ url_for('admin_delete_internship', internship_id=item['id']) }}" style="margin:0;" onsubmit="return confirm('Delete this internship listing?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="ai-btn btn-red">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div style="padding:2.5rem; text-align:center; color:#64748b;">
+        No internship listings found. Click <strong>+ Add New Listing</strong> or <strong>Load Sample Listings</strong> above.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

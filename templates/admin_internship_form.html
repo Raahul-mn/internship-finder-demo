@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .af-wrap { max-width: 880px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, -apple-system, sans-serif; color: #1e293b; }
+  .af-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(15,23,42,0.05); }
+  .af-head { background: #0f172a; color: #ffffff; padding: 1.25rem 1.5rem; }
+  .af-body { padding: 1.5rem; }
+  .af-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  @media (max-width: 720px) { .af-grid { grid-template-columns: 1fr; } }
+  .af-full { grid-column: 1 / -1; }
+  .af-field label { display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem; }
+  .af-field input, .af-field select, .af-field textarea { width: 100%; box-sizing: border-box; padding: 0.55rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; background: #f8fafc; }
+  .af-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+  .af-btn { padding: 0.6rem 1.3rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; border: none; cursor: pointer; text-decoration: none; }
+</style>
+
+<div class="af-wrap">
+  <div class="af-card">
+    <div class="af-head">
+      <h3 style="margin:0; font-size:1.25rem;">{{ 'Edit Internship Listing' if is_edit else 'Create New Internship Listing' }}</h3>
+    </div>
+    <div class="af-body">
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="af-grid">
+          <div class="af-field">
+            <label>Internship Role Title *</label>
+            <input type="text" name="title" required value="{{ (internship['title'] or '') if internship else '' }}" placeholder="e.g., Python Backend Developer Intern">
+          </div>
+          <div class="af-field">
+            <label>Company Name *</label>
+            <input type="text" name="company_name" required value="{{ (internship['company_name'] or '') if internship else '' }}" placeholder="e.g., Freshworks">
+          </div>
+
+          <div class="af-field">
+            <label>Company Category / Tier</label>
+            <input type="text" name="company_type" value="{{ (internship['company_type'] or '') if internship else '' }}" placeholder="e.g., Tier 2 Product Scale-up">
+          </div>
+          <div class="af-field">
+            <label>Location</label>
+            <input type="text" name="location" value="{{ (internship['location'] or '') if internship else '' }}" placeholder="e.g., Chennai, Bengaluru, Remote">
+          </div>
+
+          <div class="af-field">
+            <label>Work Mode *</label>
+            {% set wm = (internship['work_mode'] or 'On-site') if internship else 'On-site' %}
+            <select name="work_mode" required>
+              <option value="Remote" {% if wm == 'Remote' %}selected{% endif %}>Remote</option>
+              <option value="On-site" {% if wm == 'On-site' %}selected{% endif %}>On-site</option>
+              <option value="Hybrid" {% if wm == 'Hybrid' %}selected{% endif %}>Hybrid</option>
+            </select>
+          </div>
+          <div class="af-field">
+            <label>Duration</label>
+            <input type="text" name="duration" value="{{ (internship['duration'] or '') if internship else '' }}" placeholder="e.g., 2 Months / 6 Months">
+          </div>
+
+          <div class="af-field">
+            <label>Stipend Type *</label>
+            {% set st_type = (internship['stipend_type'] or 'Paid') if internship else 'Paid' %}
+            <select name="stipend_type" required>
+              <option value="Paid" {% if st_type == 'Paid' %}selected{% endif %}>Paid</option>
+              <option value="Unpaid" {% if st_type == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+              <option value="Not specified" {% if st_type == 'Not specified' %}selected{% endif %}>Not specified</option>
+            </select>
+          </div>
+          <div class="af-field">
+            <label>Stipend Amount</label>
+            <input type="text" name="stipend_amount" value="{{ (internship['stipend_amount'] or '') if internship else '' }}" placeholder="e.g., ₹20,000 / month">
+          </div>
+
+          <div class="af-field">
+            <label>Listing Status *</label>
+            {% set cur_st = (internship['status'] or 'Approved') if internship else 'Approved' %}
+            <select name="status" required>
+              <option value="Draft" {% if cur_st == 'Draft' %}selected{% endif %}>Draft</option>
+              <option value="Approved" {% if cur_st == 'Approved' %}selected{% endif %}>Approved</option>
+              <option value="Rejected" {% if cur_st == 'Rejected' %}selected{% endif %}>Rejected</option>
+              <option value="Expired" {% if cur_st == 'Expired' %}selected{% endif %}>Expired</option>
+            </select>
+          </div>
+          <div class="af-field">
+            <label>External Application Link (Optional)</label>
+            <input type="url" name="application_link" value="{{ (internship['application_link'] or '') if internship else '' }}" placeholder="https://...">
+          </div>
+
+          <div class="af-field af-full">
+            <label>Required Skills</label>
+            <input type="text" name="required_skills" value="{{ (internship['required_skills'] or '') if internship else '' }}" placeholder="e.g., Python, Flask, SQL, Git">
+          </div>
+
+          <div class="af-field af-full">
+            <label>Eligibility Criteria</label>
+            <input type="text" name="eligibility" value="{{ (internship['eligibility'] or '') if internship else '' }}" placeholder="e.g., B.Tech CSE/IT, Minimum 7.5 CGPA">
+          </div>
+
+          <div class="af-field af-full">
+            <label>Role Description *</label>
+            <textarea name="description" rows="4" required placeholder="Describe responsibilities, tech stack, and learning outcomes...">{{ (internship['description'] or '') if internship else '' }}</textarea>
+          </div>
+
+          <div class="af-field af-full">
+            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+              <input type="checkbox" name="is_sample_listing" value="1" style="width:auto;"
+                     {% if internship and internship['is_sample_listing'] %}checked{% endif %}>
+              Mark as Sample Listing (clearly displays a Sample Listing badge)
+            </label>
+          </div>
+        </div>
+
+        <div class="af-actions">
+          <button type="submit" class="af-btn" style="background:#2563eb; color:#ffffff;">Save Listing</button>
+          <a href="{{ url_for('admin_internships') }}" class="af-btn" style="background:#f1f5f9; color:#334155;">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
