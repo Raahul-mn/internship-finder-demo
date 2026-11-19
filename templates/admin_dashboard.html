@@ -1,21 +1,146 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row">
-  <div class="col-md-12">
-    <div class="p-5 bg-white rounded-3 shadow-sm border-0 mb-4">
-      <h2 class="fw-bold text-dark">Employer / Admin Dashboard</h2>
-      <p class="text-muted fs-5">Welcome administrator, {{ session.get('email', 'Admin') }}</p>
-      <div class="alert alert-dark">Manage internship listings, reviews, and applications here.</div>
-      <hr class="my-4">
-      <div class="d-flex gap-3 flex-wrap">
-        <a href="{{ url_for('admin_internships') }}" class="btn btn-primary px-4 py-2">
-          Manage Internship Listings ({{ total_listings or 0 }})
-        </a>
-        <a href="{{ url_for('admin_new_internship') }}" class="btn btn-success px-4 py-2">
-          + Add New Listing
-        </a>
+<style>
+  .ad-wrap { max-width: 1180px; margin: 1.5rem auto; padding: 0 1rem; font-family: system-ui, -apple-system, sans-serif; color: #1e293b; }
+  .ad-hero { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.75rem; margin-bottom: 1.25rem; box-shadow: 0 4px 14px rgba(15,23,42,0.04); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
+  .ad-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.9rem; margin-bottom: 1.5rem; }
+  .ad-stat { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.2rem; }
+  .ad-stat-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: #64748b; }
+  .ad-stat-val { font-size: 1.65rem; font-weight: 800; color: #0f172a; margin-top: 0.25rem; }
+  .ad-panel { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow-x: auto; box-shadow: 0 4px 14px rgba(15,23,42,0.04); }
+  .ad-panel-head { padding: 1.15rem 1.35rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+  .ad-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .ad-table th, .ad-table td { padding: 0.9rem 1.1rem; text-align: left; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  .ad-table th { background: #f8fafc; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #475569; }
+  .st-pill { display: inline-block; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.76rem; font-weight: 700; }
+  .st-Applied { background: #e0f2fe; color: #0369a1; }
+  .st-Under-Review { background: #fef3c7; color: #92400e; }
+  .st-Shortlisted { background: #ede9fe; color: #5b21b6; }
+  .st-Selected { background: #dcfce7; color: #166534; }
+  .st-Rejected { background: #fee2e2; color: #991b1b; }
+  .ad-form { display: flex; flex-direction: column; gap: 0.45rem; min-width: 230px; }
+  .ad-form select, .ad-form input { padding: 0.4rem 0.6rem; border: 1px solid #cbd5e1; border-radius: 7px; font-size: 0.83rem; background: #f8fafc; }
+  .ad-btn { padding: 0.42rem 0.85rem; border-radius: 7px; font-size: 0.82rem; font-weight: 600; border: none; cursor: pointer; background: #0f172a; color: #ffffff; }
+</style>
+
+<div class="ad-wrap">
+  <div class="ad-hero">
+    <div>
+      <h2 style="margin:0; font-size:1.55rem; color:#0f172a;">Employer / Admin Portal</h2>
+      <p style="margin:0.25rem 0 0; color:#64748b; font-size:0.92rem;">Welcome, {{ session.get('username') or session.get('email', 'Admin') }} &bull; Review student applications and manage internship listings.</p>
+    </div>
+    <div style="display:flex; gap:0.65rem; flex-wrap:wrap;">
+      <a href="{{ url_for('admin_internships') }}" class="btn btn-primary px-3 py-2">
+        Manage Listings ({{ total_listings or 0 }})
+      </a>
+      <a href="{{ url_for('admin_new_internship') }}" class="btn btn-success px-3 py-2">
+        + Add New Listing
+      </a>
+    </div>
+  </div>
+
+  <!-- Summary Metrics -->
+  <div class="ad-stats">
+    <div class="ad-stat">
+      <div class="ad-stat-label">Active Listings</div>
+      <div class="ad-stat-val">{{ stats.total_listings if stats else (total_listings or 0) }}</div>
+    </div>
+    <div class="ad-stat">
+      <div class="ad-stat-label">Student Entries</div>
+      <div class="ad-stat-val">{{ stats.total_applications if stats else 0 }}</div>
+    </div>
+    <div class="ad-stat">
+      <div class="ad-stat-label">Awaiting Review</div>
+      <div class="ad-stat-val" style="color:#d97706;">{{ stats.pending_review if stats else 0 }}</div>
+    </div>
+    <div class="ad-stat">
+      <div class="ad-stat-label">Shortlisted</div>
+      <div class="ad-stat-val" style="color:#6d28d9;">{{ stats.shortlisted if stats else 0 }}</div>
+    </div>
+    <div class="ad-stat">
+      <div class="ad-stat-label">Selected</div>
+      <div class="ad-stat-val" style="color:#15803d;">{{ stats.selected if stats else 0 }}</div>
+    </div>
+  </div>
+
+  <!-- Student Applications & AI Opportunity Entries Review Queue -->
+  <div class="ad-panel">
+    <div class="ad-panel-head">
+      <div>
+        <h3 style="margin:0; font-size:1.15rem; color:#0f172a;">Student Applications &amp; AI Opportunity Entries</h3>
+        <p style="margin:0.15rem 0 0; font-size:0.84rem; color:#64748b;">Evaluate candidate CGPA, skills, and pitch notes, then update application status and feedback.</p>
       </div>
     </div>
+
+    {% if applications %}
+      <table class="ad-table">
+        <thead>
+          <tr>
+            <th>Candidate Profile</th>
+            <th>Target Company &amp; Role</th>
+            <th>Candidate Pitch / Notes</th>
+            <th>Current Status</th>
+            <th>Review &amp; Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for app_item in applications %}
+            <tr>
+              <td>
+                <strong>{{ app_item['student_name'] or app_item['student_username'] }}</strong>
+                <div style="font-size:0.8rem; color:#64748b;">{{ app_item['student_email'] }}</div>
+                {% if app_item['student_college'] or app_item['student_cgpa'] %}
+                  <div style="font-size:0.8rem; color:#334155; margin-top:0.25rem;">
+                    {{ app_item['student_college'] or 'College N/A' }}
+                    {% if app_item['student_cgpa'] %} &bull; <strong>CGPA: {{ app_item['student_cgpa'] }}</strong>{% endif %}
+                  </div>
+                {% endif %}
+                {% if app_item['student_skills'] %}
+                  <div style="font-size:0.78rem; color:#2563eb; margin-top:0.2rem;">Skills: {{ app_item['student_skills'] }}</div>
+                {% endif %}
+              </td>
+
+              <td>
+                <strong style="color:#0f172a;">{{ app_item['role_applied'] }}</strong>
+                <div style="color:#2563eb; font-weight:600;">{{ app_item['company_name'] }}</div>
+                <div style="font-size:0.78rem; color:#64748b; margin-top:0.2rem;">Submitted: {{ app_item['created_at'] }}</div>
+              </td>
+
+              <td style="max-width:270px;">
+                <div style="font-size:0.84rem; color:#334155;">{{ app_item['notes'] or 'No additional pitch note provided.' }}</div>
+                {% if app_item['admin_feedback'] %}
+                  <div style="margin-top:0.4rem; padding:0.35rem 0.55rem; background:#f8fafc; border-left:3px solid #2563eb; font-size:0.79rem; color:#1e293b;">
+                    <strong>Feedback:</strong> {{ app_item['admin_feedback'] }}
+                  </div>
+                {% endif %}
+              </td>
+
+              <td>
+                {% set cur_st = app_item['status'] or 'Applied' %}
+                <span class="st-pill st-{{ cur_st.replace(' ', '-') }}">{{ cur_st }}</span>
+              </td>
+
+              <td>
+                <form method="POST" action="{{ url_for('admin_update_application_status', app_id=app_item['id']) }}" class="ad-form">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <select name="status">
+                    {% for st in allowed_statuses %}
+                      <option value="{{ st }}" {% if (app_item['status'] or 'Applied') == st %}selected{% endif %}>{{ st }}</option>
+                    {% endfor %}
+                  </select>
+                  <input type="text" name="admin_feedback" value="{{ app_item['admin_feedback'] or '' }}" placeholder="Optional feedback note...">
+                  <button type="submit" class="ad-btn">Update Status</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div style="padding:2.5rem; text-align:center; color:#64748b;">
+        No student applications or AI opportunity entries submitted yet.
+      </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

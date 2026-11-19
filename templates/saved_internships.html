@@ -1,42 +1,69 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
-  .si-wrap { max-width: 960px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, -apple-system, sans-serif; color: #1e293b; }
-  .si-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+  .si-wrap { max-width: 980px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, -apple-system, sans-serif; color: #1e293b; }
+  .si-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
   .si-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
   .si-btn { padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; }
   .si-btn-primary { background: #2563eb; color: #ffffff; }
   .si-btn-danger { background: #fee2e2; color: #991b1b; }
   .si-btn-secondary { background: #f1f5f9; color: #334155; }
+  .st-badge { display: inline-block; padding: 0.22rem 0.65rem; border-radius: 999px; font-size: 0.76rem; font-weight: 700; margin-left: 0.45rem; }
+  .st-Applied { background: #e0f2fe; color: #0369a1; }
+  .st-Under-Review { background: #fef3c7; color: #92400e; }
+  .st-Shortlisted { background: #ede9fe; color: #5b21b6; }
+  .st-Selected { background: #dcfce7; color: #166534; }
+  .st-Rejected { background: #fee2e2; color: #991b1b; }
+  .st-Saved { background: #f1f5f9; color: #475569; }
 </style>
 
 <div class="si-wrap">
   <div class="si-header">
     <div>
-      <h2 style="margin:0; font-size:1.5rem; color:#0f172a;">Saved Internships</h2>
-      <p style="margin:0.2rem 0 0; color:#64748b; font-size:0.9rem;">Your bookmarked opportunities ready for review and application.</p>
+      <h2 style="margin:0; font-size:1.5rem; color:#0f172a;">Saved Wishlist &amp; Applied Entries</h2>
+      <p style="margin:0.2rem 0 0; color:#64748b; font-size:0.9rem;">Track your bookmarked opportunities, submitted entries, and live admin review statuses.</p>
     </div>
-    <div style="display:flex; gap:0.6rem;">
-      <a href="{{ url_for('browse_internships') }}" class="si-btn si-btn-primary">Browse More</a>
+    <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+      <a href="{{ url_for('generate_recommendations') }}" class="si-btn si-btn-primary">✨ AI Matchmaker</a>
+      <a href="{{ url_for('browse_internships') }}" class="si-btn si-btn-secondary">Browse All</a>
       <a href="{{ url_for('student_dashboard') }}" class="si-btn si-btn-secondary">Dashboard</a>
     </div>
   </div>
 
   {% if saved_internships %}
     {% for item in saved_internships %}
+      {% set app_entry = applied_by_internship.get(item['id']) if applied_by_internship else None %}
       <div class="si-card">
-        <div>
-          <h3 style="margin:0; font-size:1.1rem; color:#0f172a;">{{ item['title'] }}</h3>
-          <div style="color:#2563eb; font-weight:600; font-size:0.9rem; margin-top:0.15rem;">
+        <div style="flex:1; min-width:260px;">
+          <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.35rem;">
+            <h3 style="margin:0; font-size:1.1rem; color:#0f172a;">{{ item['title'] }}</h3>
+            {% if app_entry %}
+              {% set st = app_entry['status'] or 'Applied' %}
+              <span class="st-badge st-{{ st.replace(' ', '-') }}">Status: {{ st }}</span>
+            {% else %}
+              <span class="st-badge st-Saved">Wishlisted</span>
+            {% endif %}
+          </div>
+          <div style="color:#2563eb; font-weight:600; font-size:0.9rem; margin-top:0.2rem;">
             {{ item['company_name'] }} &bull; {{ item['location'] or 'India' }} ({{ item['work_mode'] }})
           </div>
           <div style="font-size:0.82rem; color:#64748b; margin-top:0.35rem;">
             Stipend: {{ item['stipend_type'] }}{% if item['stipend_amount'] %} ({{ item['stipend_amount'] }}){% endif %}
             {% if item['duration'] %} &bull; Duration: {{ item['duration'] }}{% endif %}
           </div>
+          {% if app_entry and app_entry['notes'] %}
+            <div style="font-size:0.82rem; color:#334155; margin-top:0.4rem;">
+              <strong>Your Entry Note:</strong> {{ app_entry['notes'] }}
+            </div>
+          {% endif %}
+          {% if app_entry and app_entry['admin_feedback'] %}
+            <div style="margin-top:0.45rem; padding:0.45rem 0.65rem; background:#eff6ff; border-left:3px solid #2563eb; border-radius:4px; font-size:0.82rem; color:#1e3a8a;">
+              <strong>Admin Feedback:</strong> {{ app_entry['admin_feedback'] }}
+            </div>
+          {% endif %}
         </div>
         <div style="display:flex; gap:0.5rem; align-items:center;">
-          <a href="{{ url_for('internship_details', internship_id=item['id']) }}" class="si-btn si-btn-primary">View / Apply</a>
+          <a href="{{ url_for('internship_details', internship_id=item['id']) }}" class="si-btn si-btn-primary">View Details</a>
           <form method="POST" action="{{ url_for('unsave_internship', internship_id=item['id']) }}" style="margin:0;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="si-btn si-btn-danger">Remove</button>
@@ -47,9 +74,9 @@
   {% else %}
     <div class="si-card" style="justify-content:center; text-align:center; padding:2.5rem;">
       <div>
-        <h4 style="margin:0 0 0.5rem;">No bookmarked internships yet</h4>
-        <p style="color:#64748b; margin:0 0 1rem;">Explore approved internship listings and bookmark opportunities you want to track.</p>
-        <a href="{{ url_for('browse_internships') }}" class="si-btn si-btn-primary">Explore Internships</a>
+        <h4 style="margin:0 0 0.5rem;">No saved opportunities or entries yet</h4>
+        <p style="color:#64748b; margin:0 0 1rem;">Use AI Opportunity Matchmaker or browse approved listings to wishlist and submit entries.</p>
+        <a href="{{ url_for('generate_recommendations') }}" class="si-btn si-btn-primary">Open AI Matchmaker</a>
       </div>
     </div>
   {% endif %}

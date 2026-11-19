@@ -4,12 +4,14 @@
     <div class="col-md-12">
         <div class="p-5 bg-white rounded-3 shadow-sm border-0 mb-4">
             <h2 class="fw-bold text-dark">Welcome back, {{ session.get('username') or session.get('email', 'Student') }}! 👋</h2>
-            <p class="text-muted fs-5">Manage your candidate profile, review AI recommendations, and track saved opportunities.</p>
+            <p class="text-muted fs-5">Manage your candidate profile, review AI recommendations, and track your applied entries.</p>
             <hr class="my-4">
             <div class="d-flex gap-3 flex-wrap">
                 <a href="{{ url_for('student_profile') }}" class="btn btn-primary px-4 py-2">Create / Update Profile</a>
                 <a href="{{ url_for('generate_recommendations') }}" class="btn btn-dark px-4 py-2">✨ Get AI Recommendations</a>
-                <a href="{{ url_for('saved_internships') }}" class="btn btn-warning px-4 py-2">Saved Wishlist ({{ bookmark_count or 0 }})</a>
+                <a href="{{ url_for('saved_internships') }}" class="btn btn-warning px-4 py-2">
+                    Wishlist &amp; Entries ({{ bookmark_count or 0 }} Saved &bull; {{ application_count or 0 }} Applied)
+                </a>
             </div>
         </div>
     </div>

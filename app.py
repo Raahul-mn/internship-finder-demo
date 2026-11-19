@@ -175,12 +175,18 @@ def student_dashboard():
     db = get_db_connection(app.config['DATABASE_PATH'])
     user_id = session.get('user_id')
     profile = db.execute('SELECT * FROM profiles WHERE user_id = ?', (user_id,)).fetchone()
+    app_row = db.execute(
+        "SELECT COUNT(*) AS cnt FROM applications WHERE student_id = ?",
+        (user_id,)
+    ).fetchone()
+    application_count = app_row['cnt'] if app_row else 0
     db.close()
     bookmarked_ids = get_student_bookmarked_ids(app.config['DATABASE_PATH'], user_id)
     return render_template(
         'student_dashboard.html',
         profile=profile,
         bookmark_count=len(bookmarked_ids),
+        application_count=application_count,
         title="Student Dashboard — InternShip Finder"
     )
 
@@ -386,11 +392,11 @@ def save_ai_opportunity_entry():
                 INSERT INTO applications (
                     student_id, internship_id, company_name, role_applied, resume_filename, notes, status
                 )
-                VALUES (?, ?, ?, ?, ?, ?, 'Pending')
+                VALUES (?, ?, ?, ?, ?, ?, 'Applied')
                 ''',
                 (student_id, internship_id, company_name, role_title, resume_file, note)
             )
-            flash(f'Created & submitted application entry for {role_title} at {company_name} (Status: Pending)!', 'success')
+            flash(f'Created & submitted application entry for {role_title} at {company_name} (Status: Applied)!', 'success')
     else:
         flash(f'Added {role_title} at {company_name} to your Saved Wishlist!', 'success')
 
@@ -487,16 +493,77 @@ def unsave_internship(internship_id):
 
 
 # --- Admin Internship Management Routes ---
+ALLOWED_APPLICATION_STATUSES = ("Applied", "Under Review", "Shortlisted", "Selected", "Rejected")
+
+
 @app.route('/admin/dashboard')
 @admin_required
 def admin_dashboard():
     all_listings = get_all_internships_admin(app.config['DATABASE_PATH'])
+    db = get_db_connection(app.config['DATABASE_PATH'])
+    try:
+        applications = db.execute(
+            '''
+            SELECT a.*,
+                   u.username AS student_username,
+                   u.email AS student_email,
+                   p.name AS student_name,
+                   p.college AS student_college,
+                   p.cgpa AS student_cgpa,
+                   p.skills AS student_skills,
+                   p.courses AS student_courses
+            FROM applications a
+            JOIN users u ON a.student_id = u.id
+            LEFT JOIN profiles p ON a.student_id = p.user_id
+            ORDER BY a.updated_at DESC, a.id DESC
+            '''
+        ).fetchall()
+    finally:
+        db.close()
+
+    stats = {
+        "total_listings": len(all_listings),
+        "total_applications": len(applications),
+        "pending_review": sum(1 for a in applications if (a["status"] or "Applied") in ("Applied", "Under Review")),
+        "shortlisted": sum(1 for a in applications if a["status"] == "Shortlisted"),
+        "selected": sum(1 for a in applications if a["status"] == "Selected"),
+    }
     return render_template(
         'admin_dashboard.html',
         total_listings=len(all_listings),
+        applications=applications,
+        stats=stats,
+        allowed_statuses=ALLOWED_APPLICATION_STATUSES,
         title="Admin Portal — InternShip Finder"
     )
 
+@app.route('/admin/applications/<int:app_id>/status', methods=['POST'])
+@admin_required
+def admin_update_application_status(app_id):
+    verify_csrf()
+    new_status = (request.form.get('status') or '').strip()
+    admin_feedback = (request.form.get('admin_feedback') or '').strip()
+
+    if new_status not in ALLOWED_APPLICATION_STATUSES:
+        flash('Invalid application status selected.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    db = get_db_connection(app.config['DATABASE_PATH'])
+    try:
+        db.execute(
+            '''
+            UPDATE applications
+            SET status = ?, admin_feedback = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            ''',
+            (new_status, admin_feedback, app_id),
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    flash(f'Application #{app_id} updated to "{new_status}".', 'success')
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/internships')
 @admin_required
