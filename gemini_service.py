@@ -215,6 +215,7 @@ def generate_ai_recommendations(profile, override_need=""):
 
     college = p.get("college") or "Not specified"
     cgpa = p.get("cgpa") or "Not specified"
+    degree_branch = p.get("degree_branch") or "Not specified"
     courses = p.get("courses") or "Not specified"
     course_duration = p.get("course_duration") or "4 Years (8 Semesters)"
     current_semester = p.get("current_semester") or "Not specified"
@@ -243,33 +244,33 @@ Never write generic filler. Every single company card MUST cite exact numbers, c
 CANDIDATE 8-FACTOR AUDIT PROFILE:
 1. College / Institution: {college}
 2. Exact CGPA / Score: {cgpa} -> {academic['band']}
-   - Cutoff Rule: {academic['tier_guidance']}
-3. Degree & Completed Courses: {courses} ({course_duration})
+  - Cutoff Rule: {academic['tier_guidance']}
+3. Degree, Branch & Completed Courses: {degree_branch} | {courses} ({course_duration})
 4. Semester Window: Currently in {current_semester} -> Applying for {target_semester}
 5. Duration & Stipend Target: {internship_duration} | Expected Stipend: {stipend_expectation}
 6. Extracted Technical Skills (Profile + Resume): {skills_joined}
 7. Projects Built: {projects}
 8. Target Role, Location & Immediate Need ("What I Need"):
-   - Preferred Role: {role}
-   - Target City / Location: {location}
-   - Student's Specific Need: "{what_i_need}"
-   - Resume Excerpt: {resume_text if resume_text else "None provided"}
+  - Preferred Role: {role}
+  - Target City / Location: {location}
+  - Student's Specific Need: "{what_i_need}"
+  - Resume Excerpt: {resume_text if resume_text else "None provided"}
 
 MANDATORY SPECIFICITY RULES:
 1. LOCATION LOCK ({location}): Every company MUST have a real engineering center in "{location}" (or be remote-first if "{location}" is Remote). Do NOT claim they are actively hiring today and do NOT invent URLs.
 2. COMPANY TIER CALIBRATION:
-   - If CGPA >= 8.5, Tier 1 must feature Global Tech R&D / Top Product Giants in {location}, and Tier 2 must feature top SaaS/Fintech Product Scale-ups in {location}.
-   - If CGPA is 7.5–8.49, Tier 1 must feature Product Scale-ups in {location} (7.0–7.5 cutoff) and Tier 2 must feature High-Growth Startups in {location}.
-   - If CGPA < 7.5, Tier 1 must feature Project-First Startups in {location} (no strict GPA gate) and Tier 2 must feature Mid-Size Product Teams in {location}.
+  - If CGPA >= 8.5, Tier 1 must feature Global Tech R&D / Top Product Giants in {location}, and Tier 2 must feature top SaaS/Fintech Product Scale-ups in {location}.
+  - If CGPA is 7.5–8.49, Tier 1 must feature Product Scale-ups in {location} (7.0–7.5 cutoff) and Tier 2 must feature High-Growth Startups in {location}.
+  - If CGPA < 7.5, Tier 1 must feature Project-First Startups in {location} (no strict GPA gate) and Tier 2 must feature Mid-Size Product Teams in {location}.
 3. INDIVIDUAL COMPANY CARDS (4 in Tier 1, 3 in Tier 2):
-   - Give each company a DISTINCT, realistic "match_score" (varying between {max(52, academic['primary_score'] - 7)} and {min(98, academic['primary_score'] + 4)}).
-   - "matching_skills": ONLY list technologies the student ACTUALLY possesses in [{skills_joined}].
-   - "skill_gaps": Name 1–2 concrete tools that specific company uses which are MISSING from [{skills_joined}].
-   - "project_alignment": Name the student's actual project from "{projects}" and explain how to pitch it to that company.
-   - "coursework_fit": Connect a specific subject from "{courses}" to that company's engineering work.
-   - "cgpa_cutoff_note": State the typical CGPA filter vs {cgpa}.
-   - "stipend_duration_fit": Assess {internship_duration} and {stipend_expectation} against "{what_i_need}".
-   - "work_mode": Must be strictly one of "Remote", "On-site", or "Hybrid".
+  - Give each company a DISTINCT, realistic "match_score" (varying between {max(52, academic['primary_score'] - 7)} and {min(98, academic['primary_score'] + 4)}).
+  - "matching_skills": ONLY list technologies the student ACTUALLY possesses in [{skills_joined}].
+  - "skill_gaps": Name 1–2 concrete tools that specific company uses which are MISSING from [{skills_joined}].
+  - "project_alignment": Name the student's actual project from "{projects}" and explain how to pitch it to that company.
+  - "coursework_fit": Connect a specific subject from "{courses}" to that company's engineering work.
+  - "cgpa_cutoff_note": State the typical CGPA filter vs {cgpa}.
+  - "stipend_duration_fit": Assess {internship_duration} and {stipend_expectation} against "{what_i_need}".
+  - "work_mode": Must be strictly one of "Remote", "On-site", or "Hybrid".
 
 Return ONLY valid JSON matching this exact schema:
 {{
@@ -405,16 +406,7 @@ Return ONLY valid JSON matching this exact schema:
 }}
 """
         candidate_models = []
-        for m in [model_name, "gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]:
-            if m and m not in candidate_models:
-                candidate_models.append(m)
-
-        response = None
-        active_model_used = model_name
-        last_err = None
-
-        candidate_models = []
-        for m in [model_name, "gemini-3.5-flash-lite", "gemini-3.6-flash", "gemini-3.1-flash-lite"]:
+        for m in [model_name, "gemini-2.5-flash", "gemini-2.5-flash-lite"]:
             if m and m not in candidate_models:
                 candidate_models.append(m)
 
@@ -430,7 +422,7 @@ Return ONLY valid JSON matching this exact schema:
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
                         temperature=0.2,
-                        max_output_tokens=2500,
+                        max_output_tokens=8192,
                     ),
                 )
                 active_model_used = candidate
@@ -439,21 +431,23 @@ Return ONLY valid JSON matching this exact schema:
                 last_err = model_err
                 err_str = str(model_err).upper()
                 if any(code in err_str for code in ("404", "NOT_FOUND", "503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED", "TIMEOUT", "DEADLINE")):
+                    time.sleep(0.5)
                     continue
                 raise model_err
 
         if response is None and last_err is not None:
             raise last_err
 
-        text = response.text.strip()
+        text = (response.text or "").strip()
         if text.startswith("```json"):
             text = text[7:]
         elif text.startswith("```"):
             text = text[3:]
         if text.endswith("```"):
             text = text[:-3]
+        text = re.sub(r",\s*([}\]])", r"\1", text.strip())
 
-        parsed = json.loads(text.strip())
+        parsed = json.loads(text)
         if not _validate_recommendations(parsed, academic):
             logger.warning("Gemini JSON failed validation; activating offline fallback.")
             return get_platform_native_matches(p, academic, fallback_reason="Invalid AI response structure")

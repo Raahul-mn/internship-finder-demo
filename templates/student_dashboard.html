@@ -8,9 +8,9 @@
             <hr class="my-4">
             <div class="d-flex gap-3 flex-wrap">
                 <a href="{{ url_for('student_profile') }}" class="btn btn-primary px-4 py-2">Create / Update Profile</a>
-                <a href="{{ url_for('generate_recommendations') }}" class="btn btn-dark px-4 py-2">✨ Get AI Recommendations</a>
+                <a href="{{ url_for('generate_recommendations') }}" class="btn btn-dark px-4 py-2">Get Recommendations</a>
                 <a href="{{ url_for('saved_internships') }}" class="btn btn-warning px-4 py-2">
-                    Wishlist &amp; Entries ({{ bookmark_count or 0 }} Saved &bull; {{ application_count or 0 }} Applied)
+                    Bookmarked Internships ({{ bookmark_count or 0 }})  
                 </a>
             </div>
         </div>

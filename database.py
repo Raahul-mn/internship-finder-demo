@@ -16,6 +16,7 @@ def _migrate_profiles_table(db):
         row["name"] for row in db.execute("PRAGMA table_info(profiles)").fetchall()
     }
     new_columns = {
+         "degree_branch": "TEXT",
         "courses": "TEXT",
         "course_duration": "TEXT",
         "current_semester": "TEXT",

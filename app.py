@@ -202,6 +202,7 @@ def student_profile():
         email = (request.form.get('email') or '').strip()
         college = (request.form.get('college') or '').strip()
         cgpa = (request.form.get('cgpa') or '').strip()
+        degree_branch = (request.form.get('degree_branch') or '').strip()
         courses = (request.form.get('courses') or '').strip()
         course_duration = (request.form.get('course_duration') or '').strip()
         current_semester = (request.form.get('current_semester') or '').strip()
@@ -226,7 +227,7 @@ def student_profile():
         if existing_profile:
             db.execute('''
                 UPDATE profiles 
-                SET name = ?, email = ?, college = ?, cgpa = ?, courses = ?,
+                SET name = ?, email = ?, college = ?, cgpa = ?, degree_branch = ?, courses = ?,
                     course_duration = ?, current_semester = ?, target_semester = ?,
                     internship_duration = ?, stipend_expectation = ?, what_i_need = ?,
                     skills = ?, projects = ?, github_url = ?, linkedin_url = ?,
@@ -234,7 +235,7 @@ def student_profile():
                     updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = ?
             ''', (
-                name, email, college, cgpa, courses,
+                name, email, college, cgpa, degree_branch, courses,
                 course_duration, current_semester, target_semester,
                 internship_duration, stipend_expectation, what_i_need,
                 skills, projects, github_url, linkedin_url,
@@ -243,15 +244,15 @@ def student_profile():
         else:
             db.execute('''
                 INSERT INTO profiles (
-                    user_id, name, email, college, cgpa, courses,
+                    user_id, name, email, college, cgpa, degree_branch, courses,
                     course_duration, current_semester, target_semester,
                     internship_duration, stipend_expectation, what_i_need,
                     skills, projects, github_url, linkedin_url,
                     preferred_role, preferred_location
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                user_id, name, email, college, cgpa, courses,
+                user_id, name, email, college, cgpa, degree_branch, courses,
                 course_duration, current_semester, target_semester,
                 internship_duration, stipend_expectation, what_i_need,
                 skills, projects, github_url, linkedin_url,
@@ -398,7 +399,7 @@ def save_ai_opportunity_entry():
             )
             flash(f'Created & submitted application entry for {role_title} at {company_name} (Status: Applied)!', 'success')
     else:
-        flash(f'Added {role_title} at {company_name} to your Saved Wishlist!', 'success')
+        flash(f'Bookmarked {role_title} at {company_name}!', 'success')
 
     db.commit()
     db.close()
@@ -479,7 +480,7 @@ def saved_internships():
         saved_internships=saved,
         applications=applications,
         applied_by_internship=applied_by_internship,
-        title="Wishlist & Applied Entries — InternShip Finder",
+        title="Bookmarked Internships — InternShip Finder",
     )
 
 
@@ -505,7 +506,7 @@ def admin_dashboard():
         applications = db.execute(
             '''
             SELECT a.*,
-                   u.username AS student_username,
+                   u.email AS student_username,
                    u.email AS student_email,
                    p.name AS student_name,
                    p.college AS student_college,

@@ -96,18 +96,20 @@ def test_admin_crud_status_and_student_visibility(client):
     )
     assert b"Senior Python Backend Intern" in edit_res.data
 
-    # 4. Student logs in: sees Approved listing, cannot see Draft, cannot access admin routes
+    # 4. Student logs in: /internships redirects to AI Matchmaker, Approved detail works, Draft is blocked
     client.get("/logout")
     s_csrf = _login_and_get_csrf(client, "student@test.com", "StudentPass123")
 
-    browse = client.get("/internships")
-    assert b"Senior Python Backend Intern" in browse.data
-    assert b"Unpublished Draft Role" not in browse.data
+    browse = client.get("/internships", follow_redirects=False)
+    assert browse.status_code == 302
+    assert "/student/recommendations" in browse.headers["Location"]
 
-    # Search by company, role, skills, and filters
-    assert b"Senior Python Backend Intern" in client.get("/internships?q=Zoho").data
-    assert b"Senior Python Backend Intern" in client.get("/internships?location=Chennai&work_mode=On-site&skills=Python").data
-    assert b"Senior Python Backend Intern" not in client.get("/internships?work_mode=Remote").data
+    approved_detail = client.get("/internships/1")
+    assert approved_detail.status_code == 200
+    assert b"Senior Python Backend Intern" in approved_detail.data
+
+    draft_detail = client.get("/internships/2", follow_redirects=False)
+    assert draft_detail.status_code == 302
 
     # Student blocked from creating or deleting listings
     forbidden_create = client.post(
@@ -141,10 +143,10 @@ def test_admin_reject_expire_and_delete(client):
         },
     )
 
-    # Mark Expired -> hidden from students
+    # Mark Expired -> detail page blocked for students
     client.post("/admin/internships/1/status", data={"csrf_token": csrf, "status": "Expired"})
     client.get("/logout")
-    assert b"Frontend Intern" not in client.get("/internships").data
+    assert client.get("/internships/1", follow_redirects=False).status_code == 302
 
     # Admin marks Rejected then Deletes
     csrf = _login_and_get_csrf(client, "admin@test.com", "AdminPass123")

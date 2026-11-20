@@ -20,7 +20,7 @@
 <div class="si-wrap">
   <div class="si-header">
     <div>
-      <h2 style="margin:0; font-size:1.5rem; color:#0f172a;">Saved Wishlist &amp; Applied Entries</h2>
+      <h2 style="margin:0; font-size:1.5rem; color:#0f172a;">Bookmarked Internships</h2>
       <p style="margin:0.2rem 0 0; color:#64748b; font-size:0.9rem;">Track your bookmarked opportunities, submitted entries, and live admin review statuses.</p>
     </div>
     <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
@@ -41,7 +41,7 @@
               {% set st = app_entry['status'] or 'Applied' %}
               <span class="st-badge st-{{ st.replace(' ', '-') }}">Status: {{ st }}</span>
             {% else %}
-              <span class="st-badge st-Saved">Wishlisted</span>
+             <span class="st-badge st-Saved">Bookmarked</span>
             {% endif %}
           </div>
           <div style="color:#2563eb; font-weight:600; font-size:0.9rem; margin-top:0.2rem;">
@@ -74,7 +74,7 @@
   {% else %}
     <div class="si-card" style="justify-content:center; text-align:center; padding:2.5rem;">
       <div>
-        <h4 style="margin:0 0 0.5rem;">No saved opportunities or entries yet</h4>
+        <h4 style="margin:0 0 0.5rem;">No bookmarked internships yet</h4>
         <p style="color:#64748b; margin:0 0 1rem;">Use AI Opportunity Matchmaker or browse approved listings to wishlist and submit entries.</p>
         <a href="{{ url_for('generate_recommendations') }}" class="si-btn si-btn-primary">Open AI Matchmaker</a>
       </div>
